@@ -681,20 +681,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		A1869E3A305DB8E7009232D9 /* XCRemoteSwiftPackageReference "SwiftTerm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tamirelazar/SwiftTerm";
+			requirement = {
+				branch = "tslime-renderer-patches";
+				kind = branch;
+			};
+		};
 		1A000071000000000000000A /* XCRemoteSwiftPackageReference "PaperSaver" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AerialScreensaver/PaperSaver.git";
 			requirement = {
 				kind = exactVersion;
 				version = 0.2.0;
-			};
-		};
-		A1869E3A305DB8E7009232D9 /* XCRemoteSwiftPackageReference "SwiftTerm" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/migueldeicaza/SwiftTerm";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.5.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

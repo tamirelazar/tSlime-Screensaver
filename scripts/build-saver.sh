@@ -28,9 +28,14 @@ done
 
 echo "building $CONFIG (log: $LOG)"
 set +e
+# SwiftTerm ships a build-tool plugin (SwiftTermBuildInfoPlugin), and Xcode
+# asks for it to be trusted once per package identity. Since SwiftTerm is now
+# pinned to our own fork, that prompt has no answer in a non-interactive build,
+# so the validation is skipped here.
 xcodebuild -project "$REPO/AppexSaverMinimal.xcodeproj" \
   -scheme AppexSaverMinimal \
   -configuration "$CONFIG" \
+  -skipPackagePluginValidation \
   SWIFT_OPTIMIZATION_LEVEL=-O \
   "$@" build >"$LOG" 2>&1
 status=$?
