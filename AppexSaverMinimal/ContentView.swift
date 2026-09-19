@@ -58,7 +58,7 @@ struct ContentView: View {
             // MARK: - Actions
             HStack(spacing: 12) {
                 Button("Open Preview") {
-                    openWindow(id: "preview")
+                    ScreensaverPreviewController.shared.show()
                 }
                 .buttonStyle(.borderedProminent)
 

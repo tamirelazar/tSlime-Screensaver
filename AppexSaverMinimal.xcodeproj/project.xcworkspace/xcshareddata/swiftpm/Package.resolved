@@ -1,5 +1,5 @@
 {
-  "originHash" : "58d483173683d9748f852a167c8263542e3ef789aabcff2c1cc4cc0b5dad32d0",
+  "originHash" : "30c1deba780fccadf1c367b19680b7f881210d80fcb9f9db79948e5fbde46aeb",
   "pins" : [
     {
       "identity" : "papersaver",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "c5d11a805e765f52ba34ec7284bd4fcd6ba68615",
         "version" : "1.7.0"
+      }
+    },
+    {
+      "identity" : "swiftterm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/migueldeicaza/SwiftTerm",
+      "state" : {
+        "revision" : "5d14406844143538cd8f8851d2d8a67c1fe443e5",
+        "version" : "1.20.0"
       }
     }
   ],

@@ -26,17 +26,26 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Main view controller for screensaver animation.
 /// Specify your subclass name as ScreenSaverViewControllerClass in Info.plist.
+///
+/// Sizing: the superclass is NSServiceViewController (ViewBridge); after the
+/// view is attached to the remote window, the host can resize it via
+/// -remoteViewSizeChanged:transaction: (calls setFrame: on the view). Apple's
+/// own savers (e.g. Arabesque) create their view with NSZeroRect in loadView
+/// and rely on this. In practice (observed on macOS 26) WallpaperAgent hosts
+/// the saver at the screen's point size and no later resize arrives.
+///
+/// Animation: WallpaperAgent sends startAnimation/stopAnimation as
+/// NSExtensionItem commands to the ScreenSaverExtension principal class, but
+/// delivery of -startAnimation to the ScreenSaverView was NOT observed in
+/// live runs — do not gate work on it; start from viewDidMoveToWindow.
+///
+/// Note: -loadViewForFrame:isPreview: and the representedView / animating
+/// properties existed on older macOS but are gone from the current framework
+/// (verified via runtime dump); only the standard -loadView is called.
 @interface ScreenSaverViewController : NSViewController
 
-/// The ScreenSaverView that provides the animation.
-@property (nonatomic, weak, nullable) ScreenSaverView *representedView;
-
-/// Whether the screensaver is currently animating.
-@property (nonatomic, getter=isAnimating) BOOL animating;
-
-/// Called to create the view for the given frame.
-/// Swift name: loadView(forFrame:isPreview:)
-- (void)loadViewForFrame:(NSRect)frame isPreview:(BOOL)isPreview NS_SWIFT_NAME(loadView(forFrame:isPreview:));
+- (void)startAnimation;
+- (void)stopAnimation;
 
 @end
 

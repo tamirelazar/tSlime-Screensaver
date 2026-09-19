@@ -24,6 +24,14 @@
 		1A000066000000000000000A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000064000000000000000B /* Logger.swift */; };
 		1A000067000000000000000A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000064000000000000000B /* Logger.swift */; };
 		1A000070000000000000000A /* PaperSaverKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1A000070000000000000000B /* PaperSaverKit */; };
+		A1869E39305DB82B009232D9 /* TerminalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E38305DB82B009232D9 /* TerminalManager.swift */; };
+		A1869E3C305DB8E7009232D9 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = A1869E3B305DB8E7009232D9 /* SwiftTerm */; };
+		A1869E3D305DB9E4009232D9 /* TerminalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E38305DB82B009232D9 /* TerminalManager.swift */; };
+		A1869E41305DC022009232D9 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = A1869E40305DC022009232D9 /* SwiftTerm */; };
+		A1869E43305DC453009232D9 /* cbonsai in Resources */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* cbonsai */; };
+		A1869E44305DC453009232D9 /* cbonsai in Resources */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* cbonsai */; };
+		A1869E46305DC4D6009232D9 /* cbonsai in CopyFiles */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* cbonsai */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		A1869E48305DD34B009232D9 /* ScreensaverPreviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E47305DD34B009232D9 /* ScreensaverPreviewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +54,16 @@
 				1A000007000000000000000A /* AppexSaverMinimalExtension.appex in Embed PlugIns */,
 			);
 			name = "Embed PlugIns";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1869E45305DC4B0009232D9 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				A1869E46305DC4D6009232D9 /* cbonsai in CopyFiles */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -73,6 +91,9 @@
 		1A000062000000000000000B /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		1A000063000000000000000B /* PreviewViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewViewRepresentable.swift; sourceTree = "<group>"; };
 		1A000064000000000000000B /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		A1869E38305DB82B009232D9 /* TerminalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalManager.swift; sourceTree = "<group>"; };
+		A1869E42305DC453009232D9 /* cbonsai */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = cbonsai; sourceTree = "<group>"; };
+		A1869E47305DD34B009232D9 /* ScreensaverPreviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreensaverPreviewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +101,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1869E3C305DB8E7009232D9 /* SwiftTerm in Frameworks */,
 				1A000070000000000000000A /* PaperSaverKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -88,6 +110,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1869E41305DC022009232D9 /* SwiftTerm in Frameworks */,
 				1A000006000000000000000A /* ScreenSaver.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -118,16 +141,11 @@
 				1A000063000000000000000B /* PreviewViewRepresentable.swift */,
 				1A00000A000000000000000B /* Info.plist */,
 				1A00000B000000000000000B /* AppexSaverMinimal.entitlements */,
+				A1869E38305DB82B009232D9 /* TerminalManager.swift */,
+				A1869E42305DC453009232D9 /* cbonsai */,
+				A1869E47305DD34B009232D9 /* ScreensaverPreviewController.swift */,
 			);
 			path = AppexSaverMinimal;
-			sourceTree = "<group>";
-		};
-		1A000065000000000000000C /* Helpers */ = {
-			isa = PBXGroup;
-			children = (
-				1A000064000000000000000B /* Logger.swift */,
-			);
-			path = Helpers;
 			sourceTree = "<group>";
 		};
 		1A000016000000000000000C /* AppexSaverMinimalExtension */ = {
@@ -171,6 +189,14 @@
 			path = PrivateHeaders;
 			sourceTree = "<group>";
 		};
+		1A000065000000000000000C /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				1A000064000000000000000B /* Logger.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -181,6 +207,7 @@
 				1A000020000000000000000A /* Sources */,
 				1A000013000000000000000A /* Frameworks */,
 				1A000021000000000000000A /* Resources */,
+				A1869E45305DC4B0009232D9 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -209,6 +236,7 @@
 			name = AppexSaverMinimal;
 			packageProductDependencies = (
 				1A000070000000000000000B /* PaperSaverKit */,
+				A1869E3B305DB8E7009232D9 /* SwiftTerm */,
 			);
 			productName = AppexSaverMinimal;
 			productReference = 1A00000C000000000000000B /* AppexSaverMinimal.app */;
@@ -222,7 +250,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					1A000010000000000000000A = {
 						CreatedOnToolsVersion = 15.0;
@@ -243,6 +271,7 @@
 			mainGroup = 1A000014000000000000000C;
 			packageReferences = (
 				1A000071000000000000000A /* XCRemoteSwiftPackageReference "PaperSaver" */,
+				A1869E3A305DB8E7009232D9 /* XCRemoteSwiftPackageReference "SwiftTerm" */,
 			);
 			productRefGroup = 1A000018000000000000000C /* Products */;
 			projectDirPath = "";
@@ -259,6 +288,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1869E44305DC453009232D9 /* cbonsai in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,6 +296,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1869E43305DC453009232D9 /* cbonsai in Resources */,
 				1A000031000000000000000A /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -299,12 +330,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A000001000000000000000A /* AppexSaverMinimalApp.swift in Sources */,
+				A1869E48305DD34B009232D9 /* ScreensaverPreviewController.swift in Sources */,
 				1A000002000000000000000A /* ContentView.swift in Sources */,
 				1A000032000000000000000A /* PluginManager.swift in Sources */,
 				1A000066000000000000000A /* Logger.swift in Sources */,
 				1A000060000000000000000A /* RainbowAnimator.swift in Sources */,
 				1A000062000000000000000A /* PreviewView.swift in Sources */,
 				1A000063000000000000000A /* PreviewViewRepresentable.swift in Sources */,
+				A1869E39305DB82B009232D9 /* TerminalManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -312,6 +345,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1869E3D305DB9E4009232D9 /* TerminalManager.swift in Sources */,
 				1A000003000000000000000A /* AppexSaverMinimalExtension.swift in Sources */,
 				1A000004000000000000000A /* AppexSaverMinimalViewController.swift in Sources */,
 				1A000005000000000000000A /* AppexSaverMinimalView.swift in Sources */,
@@ -367,6 +401,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -391,6 +426,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -431,6 +467,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -448,6 +485,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
@@ -460,6 +498,7 @@
 				CODE_SIGN_ENTITLEMENTS = AppexSaverMinimal/AppexSaverMinimal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -487,6 +526,7 @@
 				CODE_SIGN_ENTITLEMENTS = AppexSaverMinimal/AppexSaverMinimal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -511,6 +551,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = AppexSaverMinimalExtension/AppexSaverMinimalExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
@@ -548,6 +589,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = AppexSaverMinimalExtension/AppexSaverMinimalExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
@@ -621,6 +663,14 @@
 				version = 0.2.0;
 			};
 		};
+		A1869E3A305DB8E7009232D9 /* XCRemoteSwiftPackageReference "SwiftTerm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/migueldeicaza/SwiftTerm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -628,6 +678,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1A000071000000000000000A /* XCRemoteSwiftPackageReference "PaperSaver" */;
 			productName = PaperSaverKit;
+		};
+		A1869E3B305DB8E7009232D9 /* SwiftTerm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1869E3A305DB8E7009232D9 /* XCRemoteSwiftPackageReference "SwiftTerm" */;
+			productName = SwiftTerm;
+		};
+		A1869E40305DC022009232D9 /* SwiftTerm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1869E3A305DB8E7009232D9 /* XCRemoteSwiftPackageReference "SwiftTerm" */;
+			productName = SwiftTerm;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

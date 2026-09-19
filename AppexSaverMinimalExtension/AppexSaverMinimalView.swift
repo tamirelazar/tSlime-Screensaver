@@ -21,6 +21,7 @@
 //  weather/clock overlays on top of video playback.
 //
 
+import AppKit
 import ScreenSaver
 import QuartzCore
 
@@ -28,7 +29,7 @@ private let logger = AppexLog.logger("View")
 
 final class AppexSaverMinimalView: ScreenSaverView {
 
-    private let animator = RainbowAnimator()
+    private let terminal = TerminalManager()
 
     override init?(frame: NSRect, isPreview: Bool) {
         logger.info("init(frame: \(frame.size.width, privacy: .public)x\(frame.size.height, privacy: .public), isPreview: \(isPreview))")
@@ -43,7 +44,7 @@ final class AppexSaverMinimalView: ScreenSaverView {
     }
 
     deinit {
-        animator.stop()
+        terminal.stop()
         logger.info("deinit")
     }
 
@@ -51,27 +52,30 @@ final class AppexSaverMinimalView: ScreenSaverView {
 
     override func makeBackingLayer() -> CALayer {
         let layer = CALayer()
-        layer.backgroundColor = animator.currentBackgroundColor.cgColor
+        layer.backgroundColor = NSColor.black.cgColor
         layer.isOpaque = true
         return layer
     }
 
     // MARK: - ScreenSaverView Overrides
     //
-    // These are called by the framework. We rely on viewDidMoveToWindow to
-    // start/stop the animator (which is robust across both ScreenSaverEngine
-    // and System Settings preview), but the overrides remain so the framework
-    // can drive them if it wants to.
+    // The view is created at a guessed size; the host delivers the real
+    // surface size only after the view is attached to the remote window (via
+    // remoteViewSizeChanged: on the view controller). Delivery of
+    // startAnimation to this view is not guaranteed on every macOS version,
+    // so the terminal starts eagerly in viewDidMoveToWindow and
+    // TerminalManager relaunches cbonsai once the real size arrives (cbonsai
+    // cannot re-layout after SIGWINCH).
 
     override func startAnimation() {
         logger.info("startAnimation()")
         super.startAnimation()
-        animator.start()
+        terminal.start()
     }
 
     override func stopAnimation() {
         logger.info("stopAnimation()")
-        animator.stop()
+        terminal.stop()
         super.stopAnimation()
     }
 
@@ -82,18 +86,17 @@ final class AppexSaverMinimalView: ScreenSaverView {
         logger.info("viewDidMoveToWindow() hasWindow=\(self.window != nil)")
 
         if self.window != nil {
-            if let layer = self.layer {
-                animator.attach(to: layer)
-                animator.updateBounds(bounds)
-            }
-            animator.start()
+            terminal.attach(to: self)
+            terminal.updateFrame(bounds)
+            terminal.start()
         } else {
-            animator.stop()
+            terminal.stop()
         }
     }
 
     override func layout() {
         super.layout()
-        animator.updateBounds(bounds)
+        terminal.updateFrame(bounds)
     }
 }
+

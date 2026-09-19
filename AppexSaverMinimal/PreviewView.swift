@@ -12,7 +12,7 @@ import AppKit
 
 final class PreviewView: NSView {
 
-    private let animator = RainbowAnimator()
+    private let terminal = TerminalManager()
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -26,7 +26,7 @@ final class PreviewView: NSView {
 
     override func makeBackingLayer() -> CALayer {
         let layer = CALayer()
-        layer.backgroundColor = animator.currentBackgroundColor.cgColor
+        layer.backgroundColor = NSColor.black.cgColor
         layer.isOpaque = true
         return layer
     }
@@ -34,22 +34,20 @@ final class PreviewView: NSView {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         if window != nil {
-            if let layer = self.layer {
-                animator.attach(to: layer)
-                animator.updateBounds(bounds)
-            }
-            animator.start()
+            terminal.attach(to: self)
+            terminal.updateFrame(bounds)
+            terminal.start()
         } else {
-            animator.stop()
+            terminal.stop()
         }
     }
 
     override func layout() {
         super.layout()
-        animator.updateBounds(bounds)
+        terminal.updateFrame(bounds)
     }
 
     deinit {
-        animator.stop()
+        terminal.stop()
     }
 }
