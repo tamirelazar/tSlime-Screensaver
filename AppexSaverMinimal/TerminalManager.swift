@@ -11,16 +11,16 @@ import SwiftTerm
 
 private let logger = AppexLog.logger("Terminal")
 
-/// Manages a full-screen terminal session that runs `cbonsai -l`.
+/// Manages a full-screen terminal session that runs `tslime -l`.
 /// Shared between the screensaver extension view and the host app preview.
 final class TerminalManager {
 
     private weak var parentView: NSView?
     private var isRunning: Bool = false
 
-    /// Size of the terminal view when the process was launched. cbonsai lays
-    /// out for the character grid it starts with and cannot recover from a
-    /// SIGWINCH, so a material size change requires relaunching it.
+    /// Size of the terminal view when the process was launched. tslime lays
+    /// out for the character grid it starts with, so a material size change
+    /// requires relaunching it.
     private var launchedSize: CGSize?
     private var pendingRestart: DispatchWorkItem?
 
@@ -29,11 +29,11 @@ final class TerminalManager {
     #else
     private var placeholderLabel: NSTextField?
     #endif
-    
-    private func bundledCbonsaiPath() -> String? {
+
+    private func bundledTslimePath() -> String? {
         // Works for both host app and .appex: both have a Contents/MacOS directory.
         let ResourcesDir = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources")
-        let candidate = ResourcesDir.appendingPathComponent("cbonsai").path
+        let candidate = ResourcesDir.appendingPathComponent("tslime").path
         return FileManager.default.isExecutableFile(atPath: candidate) ? candidate : nil
     }
 
@@ -53,7 +53,7 @@ final class TerminalManager {
         }
         #else
         if placeholderLabel == nil {
-            let label = NSTextField(labelWithString: "Terminal unavailable.\nAdd the 'SwiftTerm' Swift Package to build a terminal, then this screensaver will run: cbonsai -l")
+            let label = NSTextField(labelWithString: "Terminal unavailable.\nAdd the 'SwiftTerm' Swift Package to build a terminal, then this screensaver will run: tslime -l")
             label.textColor = .white
             label.alignment = .center
             label.font = .systemFont(ofSize: 16)
@@ -111,20 +111,38 @@ final class TerminalManager {
 
     #if canImport(SwiftTerm)
     private func launchProcess() {
-        if let term = terminalView {
-            let t = term.getTerminal()
-            logger.info("launchProcess frame=\(term.frame.width, privacy: .public)x\(term.frame.height, privacy: .public) grid=\(t.cols, privacy: .public)x\(t.rows, privacy: .public)")
-        } else {
-            logger.info("launchProcess with no terminalView")
-        }
-        if let path = bundledCbonsaiPath() {
+        if let path = bundledTslimePath() {
             // Run the embedded binary directly
-            terminalView?.startProcess(executable: path, args: ["-l"])
+            terminalView?.startProcess(executable: path, args: ["--window-frame", "glow"])
         } else {
             // Fallback to PATH if developer hasn’t embedded yet
-            terminalView?.startProcess(executable: "/usr/bin/env", args: ["cbonsai", "-l"])
+            terminalView?.startProcess(executable: "/usr/bin/env", args: ["tslime", "--window-frame glow"])
         }
         applyWindowSize()
+        disableOutputPostProcessing()
+    }
+
+    /// Turn off ONLCR on the pty.
+    ///
+    /// Normally ncurses puts the pty into raw mode (ONLCR off) so a bare LF is
+    /// a pure line feed that leaves the cursor column unchanged. Inside the
+    /// appex sandbox the pty stays in cooked mode with ONLCR on, so every LF
+    /// the child writes is translated to CR+LF — the carriage return resets the
+    /// cursor to column 0, and the next glyphs land at the left edge
+    /// instead of their intended column (the "wraparound" artifact). Clearing
+    /// ONLCR on the master descriptor makes the sandboxed pty behave like the
+    /// non-sandboxed one.
+    private func disableOutputPostProcessing() {
+        guard let process = terminalView?.process, process.running else { return }
+        let fd = process.childfd
+        guard fd >= 0 else { return }
+        var tio = termios()
+        guard tcgetattr(fd, &tio) == 0 else {
+            logger.error("tcgetattr failed on pty")
+            return
+        }
+        tio.c_oflag &= ~tcflag_t(ONLCR)
+        _ = tcsetattr(fd, TCSANOW, &tio)
     }
 
     /// The winsize SwiftTerm passes to forkpty does not reliably reach the
@@ -139,11 +157,10 @@ final class TerminalManager {
                            ws_col: UInt16(clamping: t.cols),
                            ws_xpixel: UInt16(clamping: Int(term.frame.width)),
                            ws_ypixel: UInt16(clamping: Int(term.frame.height)))
-        let result = PseudoTerminalHelpers.setWinSize(masterPtyDescriptor: process.childfd, windowSize: &size)
-        logger.info("setWinSize \(t.cols, privacy: .public)x\(t.rows, privacy: .public) result=\(result, privacy: .public)")
+        _ = PseudoTerminalHelpers.setWinSize(masterPtyDescriptor: process.childfd, windowSize: &size)
     }
 
-    /// Relaunch cbonsai if the view has settled at a size meaningfully
+    /// Relaunch tslime if the view has settled at a size meaningfully
     /// different from the one it was launched at. Debounced so a live window
     /// resize doesn't kill the process on every frame.
     private func scheduleRestartIfNeeded(for size: CGSize) {
@@ -154,7 +171,6 @@ final class TerminalManager {
         guard abs(size.width - launched.width) > threshold ||
               abs(size.height - launched.height) > threshold else { return }
 
-        logger.info("scheduling restart: launched=\(launched.width, privacy: .public)x\(launched.height, privacy: .public) new=\(size.width, privacy: .public)x\(size.height, privacy: .public)")
         pendingRestart?.cancel()
         let work = DispatchWorkItem { [weak self] in self?.restartProcess() }
         pendingRestart = work
@@ -164,7 +180,6 @@ final class TerminalManager {
     private func restartProcess() {
         pendingRestart = nil
         guard isRunning, let term = terminalView else { return }
-        logger.info("restarting cbonsai at \(term.frame.width, privacy: .public)x\(term.frame.height, privacy: .public)")
         term.terminate()
         launchedSize = term.frame.size
         launchProcess()

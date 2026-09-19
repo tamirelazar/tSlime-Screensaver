@@ -24,13 +24,19 @@
 		1A000066000000000000000A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000064000000000000000B /* Logger.swift */; };
 		1A000067000000000000000A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000064000000000000000B /* Logger.swift */; };
 		1A000070000000000000000A /* PaperSaverKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1A000070000000000000000B /* PaperSaverKit */; };
+		1A000084000000000000000A /* FiraCode-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1A000081000000000000000B /* FiraCode-Regular.ttf */; };
+		1A000085000000000000000A /* FiraCode-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1A000081000000000000000B /* FiraCode-Regular.ttf */; };
+		1A000086000000000000000A /* FiraCode-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1A000082000000000000000B /* FiraCode-Bold.ttf */; };
+		1A000087000000000000000A /* FiraCode-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1A000082000000000000000B /* FiraCode-Bold.ttf */; };
+		1A000088000000000000000A /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1A000083000000000000000B /* OFL.txt */; };
+		1A000089000000000000000A /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1A000083000000000000000B /* OFL.txt */; };
 		A1869E39305DB82B009232D9 /* TerminalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E38305DB82B009232D9 /* TerminalManager.swift */; };
 		A1869E3C305DB8E7009232D9 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = A1869E3B305DB8E7009232D9 /* SwiftTerm */; };
 		A1869E3D305DB9E4009232D9 /* TerminalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E38305DB82B009232D9 /* TerminalManager.swift */; };
 		A1869E41305DC022009232D9 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = A1869E40305DC022009232D9 /* SwiftTerm */; };
-		A1869E43305DC453009232D9 /* cbonsai in Resources */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* cbonsai */; };
-		A1869E44305DC453009232D9 /* cbonsai in Resources */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* cbonsai */; };
-		A1869E46305DC4D6009232D9 /* cbonsai in CopyFiles */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* cbonsai */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		A1869E43305DC453009232D9 /* tslime in Resources */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* tslime */; };
+		A1869E44305DC453009232D9 /* tslime in Resources */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* tslime */; };
+		A1869E46305DC4D6009232D9 /* tslime in CopyFiles */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* tslime */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		A1869E48305DD34B009232D9 /* ScreensaverPreviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E47305DD34B009232D9 /* ScreensaverPreviewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -62,7 +68,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				A1869E46305DC4D6009232D9 /* cbonsai in CopyFiles */,
+				A1869E46305DC4D6009232D9 /* tslime in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,8 +97,11 @@
 		1A000062000000000000000B /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		1A000063000000000000000B /* PreviewViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewViewRepresentable.swift; sourceTree = "<group>"; };
 		1A000064000000000000000B /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		1A000081000000000000000B /* FiraCode-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FiraCode-Regular.ttf"; sourceTree = "<group>"; };
+		1A000082000000000000000B /* FiraCode-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FiraCode-Bold.ttf"; sourceTree = "<group>"; };
+		1A000083000000000000000B /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		A1869E38305DB82B009232D9 /* TerminalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalManager.swift; sourceTree = "<group>"; };
-		A1869E42305DC453009232D9 /* cbonsai */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = cbonsai; sourceTree = "<group>"; };
+		A1869E42305DC453009232D9 /* tslime */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = tslime; sourceTree = "<group>"; };
 		A1869E47305DD34B009232D9 /* ScreensaverPreviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreensaverPreviewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -124,6 +133,7 @@
 				1A000050000000000000000B /* BuildNumber.xcconfig */,
 				1A000015000000000000000C /* AppexSaverMinimal */,
 				1A000016000000000000000C /* AppexSaverMinimalExtension */,
+				1A000080000000000000000C /* Fonts */,
 				1A000017000000000000000C /* Frameworks */,
 				1A000018000000000000000C /* Products */,
 			);
@@ -142,7 +152,7 @@
 				1A00000A000000000000000B /* Info.plist */,
 				1A00000B000000000000000B /* AppexSaverMinimal.entitlements */,
 				A1869E38305DB82B009232D9 /* TerminalManager.swift */,
-				A1869E42305DC453009232D9 /* cbonsai */,
+				A1869E42305DC453009232D9 /* tslime */,
 				A1869E47305DD34B009232D9 /* ScreensaverPreviewController.swift */,
 			);
 			path = AppexSaverMinimal;
@@ -195,6 +205,16 @@
 				1A000064000000000000000B /* Logger.swift */,
 			);
 			path = Helpers;
+			sourceTree = "<group>";
+		};
+		1A000080000000000000000C /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				1A000081000000000000000B /* FiraCode-Regular.ttf */,
+				1A000082000000000000000B /* FiraCode-Bold.ttf */,
+				1A000083000000000000000B /* OFL.txt */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -288,7 +308,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1869E44305DC453009232D9 /* cbonsai in Resources */,
+				A1869E44305DC453009232D9 /* tslime in Resources */,
+				1A000084000000000000000A /* FiraCode-Regular.ttf in Resources */,
+				1A000086000000000000000A /* FiraCode-Bold.ttf in Resources */,
+				1A000088000000000000000A /* OFL.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,8 +319,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1869E43305DC453009232D9 /* cbonsai in Resources */,
+				A1869E43305DC453009232D9 /* tslime in Resources */,
 				1A000031000000000000000A /* Assets.xcassets in Resources */,
+				1A000085000000000000000A /* FiraCode-Regular.ttf in Resources */,
+				1A000087000000000000000A /* FiraCode-Bold.ttf in Resources */,
+				1A000089000000000000000A /* OFL.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -64,8 +64,8 @@ final class AppexSaverMinimalView: ScreenSaverView {
     // remoteViewSizeChanged: on the view controller). Delivery of
     // startAnimation to this view is not guaranteed on every macOS version,
     // so the terminal starts eagerly in viewDidMoveToWindow and
-    // TerminalManager relaunches cbonsai once the real size arrives (cbonsai
-    // cannot re-layout after SIGWINCH).
+    // TerminalManager relaunches tslime once the real size arrives (the
+    // child lays out for the grid it starts with).
 
     override func startAnimation() {
         logger.info("startAnimation()")
