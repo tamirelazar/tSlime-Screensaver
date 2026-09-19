@@ -35,7 +35,8 @@ final class AppexSaverMinimalView: ScreenSaverView {
         logger.info("init(frame: \(frame.size.width, privacy: .public)x\(frame.size.height, privacy: .public), isPreview: \(isPreview))")
         super.init(frame: frame, isPreview: isPreview)
         wantsLayer = true
-        animationTimeInterval = 1.0 / 60.0
+        // Don't override animationTimeInterval: we don't implement animateOneFrame,
+        // so a 60fps timer would fire 60 no-op callbacks/sec on the main queue.
     }
 
     required init?(coder: NSCoder) {
