@@ -49,8 +49,29 @@ This project contains two targets:
 ### Building
 
 ```bash
-xcodebuild -project AppexSaverMinimal.xcodeproj -scheme AppexSaverMinimal -configuration Debug build
+./scripts/build-saver.sh
 ```
+
+This wraps `xcodebuild` with `SWIFT_OPTIMIZATION_LEVEL=-O` and fails the build if any
+module still compiled `-Onone`. The override matters: Xcode gives Swift package targets
+(SwiftTerm, PaperSaverKit) their own build settings, so a Debug build compiles them
+`-Onone` no matter what the project sets, and an `-Onone` SwiftTerm runs at roughly half
+the frame rate. Only a command-line override outranks the package's own setting.
+
+A plain `xcodebuild -project AppexSaverMinimal.xcodeproj -scheme AppexSaverMinimal
+-configuration Debug build` (or ⌘B in Xcode) still works, but produces an unoptimized
+SwiftTerm — don't measure performance on it.
+
+### Measuring
+
+```bash
+./scripts/measure-saver.sh            # builds, runs the saver, reports, tears down
+./scripts/measure-saver.sh --seconds 30 --warmup 12 --out /tmp/run1
+```
+
+Builds through `build-saver.sh`, launches `ScreenSaverEngine`, and reports presented
+fps, extension and tslime CPU, and a `sample` breakdown of the main thread, leaving the
+raw artifacts in the output directory.
 
 ### Installing
 
