@@ -4,3 +4,8 @@ DerivedData/
 xcuserdata/
 *.xcuserstate
 *.xcbkptlist
+
+# Agent-local config and glossary (per-machine, not part of the project)
+CLAUDE.md
+CONTEXT.md
+docs/agents/

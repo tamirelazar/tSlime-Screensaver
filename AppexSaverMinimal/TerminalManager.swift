@@ -18,11 +18,14 @@ final class TerminalManager {
     private weak var parentView: NSView?
     private var isRunning: Bool = false
 
-    /// Size of the terminal view when the process was launched. tslime lays
-    /// out for the character grid it starts with, so a material size change
-    /// requires relaunching it.
-    private var launchedSize: CGSize?
-    private var pendingRestart: DispatchWorkItem?
+    // MARK: Diagnostics (persisted at .notice so `log show` can recover them)
+    private var startedAt: Date?
+    private var firstFrameLogged = false
+    private var lastMetalState: String = "n/a"
+    private var lastPresentedCount: UInt64 = 0
+    private var fpsTimer: Timer?
+    private var metalStatusObserver: NSObjectProtocol?
+    private var lastLoggedFrame: CGRect = .null
 
     #if canImport(SwiftTerm)
     private var terminalView: LocalProcessTerminalView?
@@ -50,6 +53,18 @@ final class TerminalManager {
             term.font = NSFont.monospacedSystemFont(ofSize: 16, weight: .regular)
             view.addSubview(term)
             terminalView = term
+            // tslime redraws large portions of the screen every frame, so
+            // perFrameAggregated skips the per-row cache overhead entirely.
+            // setUseMetal is safe here because attach() is only called while
+            // the parent view already has a window (viewDidMoveToWindow guard).
+            term.metalBufferingMode = .perFrameAggregated
+            do {
+                try term.setUseMetal(true)
+                logger.notice("diag setUseMetal(true) ok; status=\(String(describing: term.metalRendererStatus.state), privacy: .public)")
+            } catch {
+                logger.error("diag setUseMetal(true) FAILED: \(String(describing: error), privacy: .public)")
+            }
+            installMetalStatusObserver(for: term)
         }
         #else
         if placeholderLabel == nil {
@@ -74,8 +89,11 @@ final class TerminalManager {
         if terminalView == nil, let view = parentView {
             attach(to: view)
         }
-        launchedSize = terminalView?.frame.size
+        startedAt = Date()
+        firstFrameLogged = false
+        logProcessContext()
         launchProcess()
+        startFpsTimer()
         #else
         // No-op; placeholder is shown.
         #endif
@@ -83,8 +101,9 @@ final class TerminalManager {
 
     func stop() {
         isRunning = false
-        pendingRestart?.cancel()
-        pendingRestart = nil
+        fpsTimer?.invalidate()
+        fpsTimer = nil
+        logger.notice("diag stop()")
 
         #if canImport(SwiftTerm)
         if let term = terminalView {
@@ -101,9 +120,15 @@ final class TerminalManager {
     }
 
     func updateFrame(_ bounds: CGRect) {
+        if bounds != lastLoggedFrame {
+            lastLoggedFrame = bounds
+            logger.notice("diag updateFrame \(Int(bounds.width), privacy: .public)x\(Int(bounds.height), privacy: .public)")
+        }
         #if canImport(SwiftTerm)
+        // Resizing the view makes SwiftTerm resize the emulator grid and push
+        // the new winsize to the pty; tslime handles the resulting SIGWINCH
+        // and re-lays out live, so no relaunch is needed.
         terminalView?.frame = bounds
-        scheduleRestartIfNeeded(for: bounds.size)
         #else
         placeholderLabel?.frame = bounds
         #endif
@@ -111,6 +136,11 @@ final class TerminalManager {
 
     #if canImport(SwiftTerm)
     private func launchProcess() {
+        if let term = terminalView {
+            let t = term.getTerminal()
+            let w = Int(term.frame.width), h = Int(term.frame.height)
+            logger.notice("diag launchProcess grid=\(t.cols, privacy: .public)x\(t.rows, privacy: .public) frame=\(w, privacy: .public)x\(h, privacy: .public)")
+        }
         if let path = bundledTslimePath() {
             // Run the embedded binary directly
             terminalView?.startProcess(executable: path, args: ["--window-frame", "glow"])
@@ -160,29 +190,59 @@ final class TerminalManager {
         _ = PseudoTerminalHelpers.setWinSize(masterPtyDescriptor: process.childfd, windowSize: &size)
     }
 
-    /// Relaunch tslime if the view has settled at a size meaningfully
-    /// different from the one it was launched at. Debounced so a live window
-    /// resize doesn't kill the process on every frame.
-    private func scheduleRestartIfNeeded(for size: CGSize) {
-        guard isRunning, let launched = launchedSize else { return }
+    // MARK: - Diagnostics
 
-        // Ignore changes smaller than roughly one character cell.
-        let threshold: CGFloat = 20
-        guard abs(size.width - launched.width) > threshold ||
-              abs(size.height - launched.height) > threshold else { return }
-
-        pendingRestart?.cancel()
-        let work = DispatchWorkItem { [weak self] in self?.restartProcess() }
-        pendingRestart = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: work)
+    /// Process identity and scheduling context. The appex is launched by the
+    /// system, so QoS / Darwin role can differ from a normal app; the pid lets
+    /// `launchctl procinfo <pid>` be correlated with these lines.
+    private func logProcessContext() {
+        let pid = ProcessInfo.processInfo.processIdentifier
+        let mainQoS = qos_class_main().rawValue
+        let selfQoS = qos_class_self().rawValue
+        let threadQoS = Thread.current.qualityOfService.rawValue
+        let cores = ProcessInfo.processInfo.activeProcessorCount
+        logger.notice("diag process pid=\(pid, privacy: .public) qos_main=\(mainQoS, privacy: .public) qos_self=\(selfQoS, privacy: .public) threadQoS=\(threadQoS, privacy: .public) isMain=\(Thread.isMainThread, privacy: .public) cores=\(cores, privacy: .public) bundle=\(Bundle.main.bundleIdentifier ?? "?", privacy: .public)")
     }
 
-    private func restartProcess() {
-        pendingRestart = nil
-        guard isRunning, let term = terminalView else { return }
-        term.terminate()
-        launchedSize = term.frame.size
-        launchProcess()
+    private func installMetalStatusObserver(for term: LocalProcessTerminalView) {
+        if let o = metalStatusObserver { NotificationCenter.default.removeObserver(o) }
+        metalStatusObserver = NotificationCenter.default.addObserver(
+            forName: .terminalViewMetalRendererStatusDidChange,
+            object: nil,
+            queue: nil
+        ) { [weak self, weak term] _ in
+            guard let self, let term else { return }
+            let status = term.metalRendererStatus
+            let state = String(describing: status.state)
+            if state != self.lastMetalState {
+                self.lastMetalState = state
+                let sinceStart = self.startedAt.map { Date().timeIntervalSince($0) } ?? -1
+                logger.notice("diag metal state -> \(state, privacy: .public) frames=\(status.presentedFrameCount, privacy: .public) t+\(String(format: "%.3f", sinceStart), privacy: .public)s")
+            }
+            if !self.firstFrameLogged, status.presentedFrameCount > 0 {
+                self.firstFrameLogged = true
+                let sinceStart = self.startedAt.map { Date().timeIntervalSince($0) } ?? -1
+                logger.notice("diag first metal frame presented t+\(String(format: "%.3f", sinceStart), privacy: .public)s")
+            }
+        }
+    }
+
+    private func startFpsTimer() {
+        fpsTimer?.invalidate()
+        lastPresentedCount = terminalView?.metalRendererStatus.presentedFrameCount ?? 0
+        let timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self, let term = self.terminalView else { return }
+            let status = term.metalRendererStatus
+            let delta = status.presentedFrameCount &- self.lastPresentedCount
+            self.lastPresentedCount = status.presentedFrameCount
+            let win = term.window
+            let visible = win?.isVisible ?? false
+            let onScreen = win?.occlusionState.contains(.visible) ?? false
+            let winNum = win?.windowNumber ?? -1
+            logger.notice("diag fps presented=\(delta, privacy: .public) state=\(String(describing: status.state), privacy: .public) usingMetal=\(term.isUsingMetalRenderer, privacy: .public) frame=\(Int(term.frame.width), privacy: .public)x\(Int(term.frame.height), privacy: .public) win=\(winNum, privacy: .public) visible=\(visible, privacy: .public) onScreen=\(onScreen, privacy: .public)")
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        fpsTimer = timer
     }
     #endif
 }
