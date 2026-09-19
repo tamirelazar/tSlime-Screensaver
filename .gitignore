@@ -9,3 +9,6 @@ xcuserdata/
 CLAUDE.md
 CONTEXT.md
 docs/agents/
+
+# Bumped on every build; local only
+BuildNumber.xcconfig
