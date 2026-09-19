@@ -121,7 +121,7 @@ struct Variant {
 enum DotShape: Int { case round, square, rounded }
 
 struct DotParams {
-    var shape: DotShape = .round
+    var shape: DotShape = .rounded   // #8: rounded is the decided default
     var sizePct: CGFloat = 0.78   // of the dot pitch
     var stretch = false            // size per axis instead of min(pitch)
     // Inset 0 is the only value that tiles perfectly: cross-cell dot spacing
@@ -402,6 +402,7 @@ final class MainVC: NSViewController {
 
         let shape = NSPopUpButton()
         shape.addItems(withTitles: ["round", "square", "rounded"])
+        shape.selectItem(at: DotShape.rounded.rawValue)
         shape.target = self; shape.action = #selector(shapeChanged(_:))
 
         let size = NSSlider(value: 78, minValue: 30, maxValue: 115, target: self, action: #selector(sizeChanged(_:)))
