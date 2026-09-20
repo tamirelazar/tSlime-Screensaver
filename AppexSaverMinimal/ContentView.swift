@@ -16,6 +16,7 @@ struct ContentView: View {
     @Environment(\.openWindow) private var openWindow
     @StateObject private var pluginManager = PluginManager()
     @State private var statusMessage = "Ready"
+    @State private var hijackedSettingsDomain: URL?
 
     var body: some View {
         VStack(spacing: 20) {
@@ -68,6 +69,8 @@ struct ContentView: View {
                 .buttonStyle(.bordered)
             }
 
+            settingsDomainWarning
+
             Text(statusMessage)
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -77,6 +80,52 @@ struct ContentView: View {
         }
         .padding(40)
         .fixedSize()
+        .onAppear(perform: checkSettingsDomain)
+    }
+
+    /// The alarm for the one failure that is invisible everywhere else.
+    ///
+    /// cfprefsd routes a defaults domain into a container the moment that
+    /// container holds a plist for it — for every writer, sandboxed or not.
+    /// A plist left behind by an earlier sandboxed build of this app sends
+    /// this app's writes into the container while the extension's reads go
+    /// to ~/Library/Preferences, and the two never meet. Nothing errors;
+    /// the settings simply never apply. It doubles as the alarm if anyone
+    /// ever puts this target back in a sandbox, which ADR 0002 forbids.
+    @ViewBuilder
+    private var settingsDomainWarning: some View {
+        if let plist = hijackedSettingsDomain {
+            GroupBox {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text("Saver settings will not apply")
+                            .fontWeight(.medium)
+                    }
+                    Text("A container holds a preferences file for this app's settings domain, so this app writes there while the screensaver reads ~/Library/Preferences. Delete it and relaunch.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(plist.path)
+                        .font(.caption.monospaced())
+                        .textSelection(.enabled)
+                        .lineLimit(3)
+                        .truncationMode(.middle)
+                }
+                .padding(8)
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+
+    private func checkSettingsDomain() {
+        #if canImport(SwiftTerm)
+        hijackedSettingsDomain = SaverSettingsStore.hijackingContainerPlistURL
+        if let plist = hijackedSettingsDomain {
+            logger.error("settings domain routed into a container: \(plist.path, privacy: .public)")
+        }
+        #endif
     }
 
     @ViewBuilder

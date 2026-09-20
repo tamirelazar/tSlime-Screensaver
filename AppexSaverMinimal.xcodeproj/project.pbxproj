@@ -31,6 +31,8 @@
 		1A000088000000000000000A /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1A000083000000000000000B /* OFL.txt */; };
 		1A000089000000000000000A /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1A000083000000000000000B /* OFL.txt */; };
 		A1869E39305DB82B009232D9 /* TerminalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E38305DB82B009232D9 /* TerminalManager.swift */; };
+		A1869E51305DC10A009232D9 /* SaverSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E50305DC10A009232D9 /* SaverSettings.swift */; };
+		A1869E52305DC10A009232D9 /* SaverSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E50305DC10A009232D9 /* SaverSettings.swift */; };
 		A1869E3C305DB8E7009232D9 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = A1869E3B305DB8E7009232D9 /* SwiftTerm */; };
 		A1869E3D305DB9E4009232D9 /* TerminalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E38305DB82B009232D9 /* TerminalManager.swift */; };
 		A1869E41305DC022009232D9 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = A1869E40305DC022009232D9 /* SwiftTerm */; };
@@ -101,6 +103,7 @@
 		1A000082000000000000000B /* FiraCode-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FiraCode-Bold.ttf"; sourceTree = "<group>"; };
 		1A000083000000000000000B /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		A1869E38305DB82B009232D9 /* TerminalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalManager.swift; sourceTree = "<group>"; };
+		A1869E50305DC10A009232D9 /* SaverSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaverSettings.swift; sourceTree = "<group>"; };
 		A1869E42305DC453009232D9 /* tslime */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = tslime; sourceTree = "<group>"; };
 		A1869E47305DD34B009232D9 /* ScreensaverPreviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreensaverPreviewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -152,6 +155,7 @@
 				1A00000A000000000000000B /* Info.plist */,
 				1A00000B000000000000000B /* AppexSaverMinimal.entitlements */,
 				A1869E38305DB82B009232D9 /* TerminalManager.swift */,
+				A1869E50305DC10A009232D9 /* SaverSettings.swift */,
 				A1869E42305DC453009232D9 /* tslime */,
 				A1869E47305DD34B009232D9 /* ScreensaverPreviewController.swift */,
 			);
@@ -364,6 +368,7 @@
 				1A000062000000000000000A /* PreviewView.swift in Sources */,
 				1A000063000000000000000A /* PreviewViewRepresentable.swift in Sources */,
 				A1869E39305DB82B009232D9 /* TerminalManager.swift in Sources */,
+				A1869E51305DC10A009232D9 /* SaverSettings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,6 +377,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1869E3D305DB9E4009232D9 /* TerminalManager.swift in Sources */,
+				A1869E52305DC10A009232D9 /* SaverSettings.swift in Sources */,
 				1A000003000000000000000A /* AppexSaverMinimalExtension.swift in Sources */,
 				1A000004000000000000000A /* AppexSaverMinimalViewController.swift in Sources */,
 				1A000005000000000000000A /* AppexSaverMinimalView.swift in Sources */,

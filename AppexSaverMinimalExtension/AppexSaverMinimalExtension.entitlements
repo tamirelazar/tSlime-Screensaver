@@ -12,5 +12,9 @@
 		<string>com.apple.CoreDisplay.master</string>
 		<string>com.apple.ViewBridgeAuxiliary</string>
 	</array>
+	<key>com.apple.security.temporary-exception.shared-preference.read-only</key>
+	<array>
+		<string>net.aerialscreensaver.AppexSaverMinimal</string>
+	</array>
 </dict>
 </plist>

@@ -29,6 +29,11 @@ final class TerminalManager {
 
     #if canImport(SwiftTerm)
     private var terminalView: LocalProcessTerminalView?
+
+    /// The saver settings, read once here and then watched. Constructing the
+    /// manager is what "read at loadView" means for the extension: the view
+    /// owns the manager, and the framework builds the view in `loadView`.
+    private let settings = SaverSettingsStore()
     #else
     private var placeholderLabel: NSTextField?
     #endif
@@ -65,6 +70,13 @@ final class TerminalManager {
                 logger.error("diag setUseMetal(true) FAILED: \(String(describing: error), privacy: .public)")
             }
             installMetalStatusObserver(for: term)
+            applyBrailleSettings(settings.braille)
+            settings.onBrailleChange = { [weak self] updated in
+                self?.applyBrailleSettings(updated)
+            }
+            // Re-reads as it starts, so a change made while this manager had
+            // no view is picked up rather than waiting for the next one.
+            settings.startObserving()
         }
         #else
         if placeholderLabel == nil {
@@ -106,6 +118,8 @@ final class TerminalManager {
         logger.notice("diag stop()")
 
         #if canImport(SwiftTerm)
+        settings.stopObserving()
+        settings.onBrailleChange = nil
         if let term = terminalView {
             term.terminate()
             term.removeFromSuperview()
@@ -135,6 +149,21 @@ final class TerminalManager {
     }
 
     #if canImport(SwiftTerm)
+    /// Pushes the settings into the live view. Always explicit values, never
+    /// "leave it at the default": what the saver looks like is decided here,
+    /// not by whichever fork revision happens to be pinned.
+    ///
+    /// The two font sources are not wired yet — the faces are not bundled,
+    /// which is #16. Until then they read as "not procedural", which turns
+    /// the drawn dot grid off and lets the current font shape the cell.
+    private func applyBrailleSettings(_ braille: BrailleSettings) {
+        guard let term = terminalView else { return }
+        term.customBrailleGlyphs = braille.source == .procedural
+        term.brailleDotSizeFraction = braille.dotSizeFraction
+        term.brailleCornerFraction = braille.cornerFraction
+        logger.notice("diag braille applied source=\(braille.source.rawValue, privacy: .public) dot=\(String(format: "%.3f", braille.dotSizeFraction), privacy: .public) corner=\(String(format: "%.3f", braille.cornerFraction), privacy: .public)")
+    }
+
     private func launchProcess() {
         if let term = terminalView {
             let t = term.getTerminal()
