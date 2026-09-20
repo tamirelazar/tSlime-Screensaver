@@ -4,12 +4,16 @@
 //
 //  The panel that floats over the live saver render, and the model behind it.
 //
-//  **This panel's look is not decided here.** #26 settles the layout, where
-//  the panel sits over the render, how the frame-rate control shows what it
-//  costs, and how the three buttons are weighted against each other — by eye,
-//  from candidates. What is below is the smallest panel that makes #21's
-//  machinery demonstrable: every control wired, every button doing exactly
-//  what it says, and nothing styled that a taste decision is going to move.
+//  The look is the one #26 settled by eye: a centred sheet, ~460 pt wide on
+//  light material, draggable by its title row; the braille source, then the
+//  two fractions as sliders with numeric readouts; the frame rate as a
+//  "Smooth motion" switch that says what it costs; and a bottom row with Hide
+//  at the left, Discard and a prominent Accept at the right. Exit is the
+//  close glyph in the title row, with Escape as its accelerator.
+//
+//  What the panel cannot do for itself — move, hide, exit — it asks the
+//  surface for through closures. It is a subview whose frame the surface
+//  owns, and Hide is an input policy on the surface, not a view state here.
 //
 
 #if canImport(SwiftTerm)
@@ -110,49 +114,89 @@ struct SettingsPanelView: View {
     /// Closes the surface. Exit drops anything unsaved without asking, which
     /// is safe precisely because Discard is sitting next to it.
     var onExit: () -> Void
+    /// Takes the panel away until the next input; the surface decides what
+    /// counts as input and brings it back.
+    var onHide: () -> Void
+    /// A drag of the title row, as a delta in the window's coordinates. The
+    /// panel cannot move itself: it is a subview whose frame the surface owns.
+    var onDrag: (CGPoint) -> Void
+
+    /// The sheet's width (#26: ~460 pt) and corner radius.
+    static let width: CGFloat = 460
+    static let cornerRadius: CGFloat = 14
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Screensaver Settings")
-                .font(.headline)
-
+        VStack(alignment: .leading, spacing: 0) {
+            titleRow
+                .padding(.bottom, 16)
             braille
-            Divider()
+            Divider().padding(.vertical, 14)
             frameRate
-            Divider()
+            Divider().padding(.vertical, 14)
             buttons
         }
-        .padding(20)
-        .frame(width: 360)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .padding(22)
+        .frame(width: Self.width)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Self.cornerRadius))
     }
 
-    @ViewBuilder
-    private var braille: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Picker("Braille", selection: $model.source) {
-                ForEach(BrailleSource.allCases, id: \.self) { source in
-                    Text(Self.name(for: source)).tag(source)
+    /// Handle glyph, title, close glyph. The handle and the title are the
+    /// drag region; the close glyph is a button of its own outside it, so a
+    /// press on it can never start a drag.
+    private var titleRow: some View {
+        HStack {
+            ZStack {
+                DragHandle(onDrag: onDrag)
+                HStack {
+                    Image(systemName: "line.3.horizontal")
+                        .foregroundStyle(.tertiary)
+                    Text("Screensaver Settings")
+                        .font(.title3.weight(.semibold))
+                    Spacer()
                 }
+                // Neither the glyph nor the title takes a click, so the handle
+                // beneath them gets every press in the row.
+                .allowsHitTesting(false)
             }
+            Button(action: onExit) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help("Exit (Esc)")
+        }
+    }
 
+    private var braille: some View {
+        Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
+            GridRow {
+                Text("Braille")
+                    .gridColumnAlignment(.trailing)
+                Picker("Braille", selection: $model.source) {
+                    ForEach(BrailleSource.allCases, id: \.self) { source in
+                        Text(Self.name(for: source)).tag(source)
+                    }
+                }
+                .labelsHidden()
+                .frame(width: 220)
+            }
             // Both fractions are disabled for a font source: they drive the
             // renderer's own dot drawing, which a face turns off entirely.
-            fraction("Dot size", value: $model.dotSizeFraction,
-                     in: BrailleSettings.dotSizeFractionRange)
-            fraction("Corner", value: $model.cornerFraction,
-                     in: BrailleSettings.cornerFractionRange)
+            GridRow {
+                Text("Dot size")
+                fraction($model.dotSizeFraction, in: BrailleSettings.dotSizeFractionRange)
+            }
+            GridRow {
+                Text("Corner")
+                fraction($model.cornerFraction, in: BrailleSettings.cornerFractionRange)
+            }
         }
-        .disabled(false)
     }
 
-    @ViewBuilder
-    private func fraction(_ label: String,
-                          value: Binding<CGFloat>,
+    private func fraction(_ value: Binding<CGFloat>,
                           in range: ClosedRange<CGFloat>) -> some View {
         HStack {
-            Text(label)
-                .frame(width: 70, alignment: .leading)
             Slider(value: value, in: range)
                 .disabled(model.source != .procedural)
             Text(String(format: "%.2f", value.wrappedValue))
@@ -161,34 +205,39 @@ struct SettingsPanelView: View {
         }
     }
 
-    @ViewBuilder
+    /// The frame rate as a switch. The cost is stated because this is a
+    /// power control, not a taste one: 60 fps is roughly a full core against
+    /// 30's half, continuously, for as long as the saver is up (#24). The
+    /// wording is #26's.
     private var frameRate: some View {
-        // The cost is stated because this is a power control, not a taste
-        // one: 60 fps is roughly a full core against 30's half, continuously,
-        // for as long as the saver is up (#24). How that is worded and laid
-        // out is #26; that it is said at all is not negotiable.
-        VStack(alignment: .leading, spacing: 6) {
-            Picker("Frame rate", selection: $model.frameRate) {
-                Text("30 fps — about half a core").tag(FrameRate.thirty)
-                Text("60 fps — about a full core").tag(FrameRate.sixty)
+        Toggle(isOn: smoothMotion) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Smooth motion")
+                Text("60 fps. Uses about a full CPU core the whole time the saver is up; off, 30 fps uses about half.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .pickerStyle(.radioGroup)
-
-            Text("Changing this restarts the animation; the last frame holds for about a third of a second.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
+        .toggleStyle(.switch)
     }
 
-    @ViewBuilder
+    private var smoothMotion: Binding<Bool> {
+        Binding(get: { model.frameRate == .sixty },
+                set: { model.frameRate = $0 ? .sixty : .thirty })
+    }
+
     private var buttons: some View {
         HStack {
-            Button("Exit", action: onExit)
+            Button("Hide", action: onHide)
+            Text("until the next input")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
             Spacer()
             Button("Discard") { model.discard() }
                 .disabled(!model.isDirty)
             Button("Accept") { model.accept() }
+                .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
                 .disabled(!model.isDirty)
         }
@@ -200,6 +249,50 @@ struct SettingsPanelView: View {
         case .juliaMonoBold: return "JuliaMono Bold"
         case .jetBrainsMonoNerdFontMono: return "JetBrainsMono NFM"
         }
+    }
+}
+
+// MARK: - Dragging
+
+/// The region of the title row a drag starts in. An AppKit view rather than
+/// a SwiftUI gesture, because the thing being moved is the hosting view the
+/// gesture would be measured in: its coordinate space moves with every
+/// step of the drag, where the window's does not.
+private struct DragHandle: NSViewRepresentable {
+    var onDrag: (CGPoint) -> Void
+
+    func makeNSView(context: Context) -> DragHandleView {
+        let view = DragHandleView()
+        view.onDrag = onDrag
+        return view
+    }
+
+    func updateNSView(_ view: DragHandleView, context: Context) {
+        view.onDrag = onDrag
+    }
+}
+
+private final class DragHandleView: NSView {
+    var onDrag: ((CGPoint) -> Void)?
+    private var last: NSPoint = .zero
+
+    override func resetCursorRects() {
+        addCursorRect(bounds, cursor: .openHand)
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        last = event.locationInWindow
+        NSCursor.closedHand.push()
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        let now = event.locationInWindow
+        onDrag?(CGPoint(x: now.x - last.x, y: now.y - last.y))
+        last = now
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        NSCursor.pop()
     }
 }
 

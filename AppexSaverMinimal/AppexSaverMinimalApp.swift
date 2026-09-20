@@ -13,6 +13,15 @@ import SwiftUI
 
 @main
 struct AppexSaverMinimalApp: App {
+    init() {
+        // `--render-panel PATH` renders the settings panel to a PNG and quits,
+        // so its layout can be checked without the tuning surface taking
+        // every screen. See SaverTuningSurface.renderPanelIfAsked.
+        #if canImport(SwiftTerm)
+        if SaverTuningSurface.renderPanelIfAsked() { exit(0) }
+        #endif
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
