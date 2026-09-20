@@ -298,12 +298,15 @@ if [[ -n "$pids" ]]; then
     if [[ -n "$wall" ]]; then
       echo "REFUSED: pid $thumb is the settings thumbnail (isPreview=1), pid $wall is the"
       echo "         desktop preview behind the pane; close System Settings and retry."
+      echo "         The thumbnail is pinned at 30 fps (#29); the desktop preview is a"
+      echo "         saver instance and renders at the saved rate, by design (#28)."
     else
       echo "REFUSED: pid $thumb is the settings thumbnail (isPreview=1); close System"
-      echo "         Settings and retry."
+      echo "         Settings and retry. It renders while the pane is open, pinned at"
+      echo "         30 fps (#29)."
     fi
-    echo "         Both render at full rate by design (#23) -- that is not the hidden"
-    echo "         state this check measures, so it is neither a pass nor a failure."
+    echo "         Either way that is not the hidden state this check measures, so it"
+    echo "         is neither a pass nor a failure."
     exit 2
   fi
 fi
