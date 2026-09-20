@@ -197,6 +197,37 @@ else
 fi
 
 echo
+echo "a font change still reaches tslime after a relaunch:"
+# The regression this section exists for. `terminate()` + `startProcess()`
+# leaves the old child's read completion in flight; it used to land on the new
+# child's state and clear `running` and `childfd`. Nothing looked broken --
+# the new child renders normally, because reads arrive through the new
+# DispatchIO -- but every write path gated on those two stopped working, so a
+# font change re-gridded the emulator and never told tslime. The result was
+# content laid out for the old grid: JuliaMono drew 190 columns into 200 and
+# looked shrunken, JetBrainsMono drew 56 rows into 49 and overflowed.
+#
+# `running=` in the extension's own `diag font ->` line is exactly that flag,
+# so the assertion is that a font change after a relaunch still sees a live
+# process.
+FONT_TS="$(date '+%Y-%m-%d %H:%M:%S')"
+defaults write "$DOMAIN" brailleSource -string juliaMonoBold
+sleep "$SETTLE"
+require_instance "after the font switch that follows a relaunch" >/dev/null
+FONT_LINE="$(/usr/bin/log show --start "$FONT_TS" --predicate "subsystem == \"$SUBSYSTEM\"" --style compact 2>/dev/null |
+             grep 'diag font -> JuliaMono-Bold ' | tail -1)"
+if [[ -z "$FONT_LINE" ]]; then
+  fail "the font change after a relaunch never re-gridded at all"
+elif printf '%s' "$FONT_LINE" | grep -q 'running=true'; then
+  ok "the emulator re-gridded and tslime was still live to hear about it"
+else
+  fail "the font change saw running=false -- the relaunch orphaned the pty, so the new grid never reached tslime"
+  echo "        $FONT_LINE"
+fi
+defaults write "$DOMAIN" brailleSource -string procedural
+sleep 2
+
+echo
 echo "a rate nobody should have stored falls back rather than being obeyed:"
 # FrameRate has exactly two values. 144 is the mistake an open number field
 # would have invited, and it must read as the default, not as 144.
