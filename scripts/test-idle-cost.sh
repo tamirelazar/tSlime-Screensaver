@@ -160,8 +160,16 @@ PANE_TOLERANCE=2
 # handshook alongside it. Prints nothing otherwise -- including when the log
 # says nothing about these pids, which is the case this must not turn into a
 # refusal: an unreadable log is not evidence of a pane.
+#
+# The pid list is flattened to spaces first, because `instances` returns one
+# pid per line and `awk -v` refuses a value with a newline in it -- it does
+# not truncate or complain to the caller, it aborts the whole program with
+# "newline in string". Caught by a real pane-open run, where the refusal
+# silently never fired and the check fell through to two bare FAILs.
 pane_roles() {
-  printf "%s\n" "$2" | awk -v live="$1" -v tol="$PANE_TOLERANCE" '
+  local live
+  live="$(printf '%s' "$1" | tr '\n\t' '  ')"
+  printf "%s\n" "$2" | awk -v live="$live" -v tol="$PANE_TOLERANCE" '
     BEGIN {
       n = split(live, L, /[ \t\n]+/)
       for (i = 1; i <= n; i++) if (L[i] != "") alive[L[i]] = 1
@@ -236,6 +244,11 @@ if [[ "$SELF_TEST" == "1" ]]; then
 
   echo "pane_roles"
   check "names both instances of an open pane" "$(pane_roles "31337 31338" "$TABLE")" "31337 31338"
+  # The shape `instances` actually returns. Passing it straight to `awk -v`
+  # aborts the program with "newline in string", which is how the first
+  # pane-open run got two bare FAILs instead of a refusal.
+  check "takes a newline-separated pid list" \
+    "$(pane_roles "$(printf '31337\n31338\n')" "$TABLE")" "31337 31338"
   check "names the thumbnail alone when its sibling is dead" \
     "$(pane_roles "31337" "$TABLE")" "31337 "
   # The ordinary case this check runs in, and the one it must not refuse on.
