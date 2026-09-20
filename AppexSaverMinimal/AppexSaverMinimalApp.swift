@@ -26,5 +26,8 @@ struct AppexSaverMinimalApp: App {
         WindowGroup {
             ContentView()
         }
+        // The window is its content's size and nothing else: the form is a
+        // list, and a resizable window would let it scroll a blank foot in.
+        .windowResizability(.contentSize)
     }
 }
