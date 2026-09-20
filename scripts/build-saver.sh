@@ -1,13 +1,14 @@
 #!/bin/bash
 #
-# Builds the screensaver with Swift optimization on for every target, and refuses
-# to hand back a build that isn't optimized.
+# Builds the screensaver and refuses to hand back a build that isn't optimized.
 #
-# Xcode compiles Swift package targets (SwiftTerm, PaperSaverKit) with their own
-# build settings: a Debug build gives them -Onone no matter what the project sets,
-# and -Onone SwiftTerm is roughly half the frame rate of -O SwiftTerm. Only a
-# command-line override outranks the package's own setting, so every measurement
-# on this repo goes through this script.
+# Xcode compiles a Swift package target with the *package's* own build settings,
+# so a Debug build gives it -Onone no matter what the project sets — and -Onone
+# SwiftTerm is roughly half the frame rate. Our SwiftTerm fork now asks for -O
+# in its own Package.swift, so a plain xcodebuild or Xcode ⌘B is optimized too;
+# this script no longer overrides SWIFT_OPTIMIZATION_LEVEL, and builds exactly
+# what ⌘B builds. What it keeps is the check: a measurement is only worth
+# anything if the thing measured was optimized.
 #
 # usage: scripts/build-saver.sh [--config Debug|Release] [--log PATH] [-- <extra xcodebuild args>]
 
@@ -16,6 +17,13 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIG=Debug
 LOG="${TMPDIR:-/tmp}/appexsaver-build-$(date +%Y%m%d-%H%M%S).log"
+
+# Modules that never run in the screensaver's frame loop, and so may be -Onone:
+# PaperSaverKit is linked into the host app only (the extension links SwiftTerm
+# and ScreenSaver.framework), and SwiftTermBuildInfoGenerator is a build-time
+# tool that never ships. Anything else unoptimized is a real problem, so a new
+# package added to the extension trips this check until it is dealt with.
+EXEMPT_MODULES="PaperSaverKit SwiftTermBuildInfoGenerator"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -36,7 +44,6 @@ xcodebuild -project "$REPO/AppexSaverMinimal.xcodeproj" \
   -scheme AppexSaverMinimal \
   -configuration "$CONFIG" \
   -skipPackagePluginValidation \
-  SWIFT_OPTIMIZATION_LEVEL=-O \
   "$@" build >"$LOG" 2>&1
 status=$?
 set -e
@@ -47,17 +54,36 @@ if [[ $status -ne 0 ]]; then
   exit $status
 fi
 
-# Any -Onone in a compiler invocation means some module was built unoptimized.
-# An incremental build that recompiled nothing is fine: changing the optimization
-# level changes the build description, so unchanged settings imply -O products.
-if grep -q -- "-Onone" "$LOG"; then
-  echo "REFUSING: modules were compiled with -Onone:" >&2
-  grep -oE "module-name [A-Za-z0-9_]+ -Onone" "$LOG" | sort -u >&2
+# One compiler invocation can carry several optimization flags — the package's
+# own -Onone, then the fork's -O after it — and the *last* one wins. So read the
+# effective level per module instead of grepping for -Onone anywhere in the log.
+effective_levels() {
+  awk '
+    /-module-name [A-Za-z0-9_]+/ {
+      mod = ""; lvl = ""
+      for (i = 1; i <= NF; i++) {
+        if ($i == "-module-name") mod = $(i + 1)
+        else if ($i == "-O" || $i == "-Onone" || $i == "-Osize") lvl = $i
+      }
+      if (mod != "" && lvl != "") print mod, lvl
+    }
+  ' "$1" | sort -u
+}
+
+LEVELS=$(effective_levels "$LOG")
+UNOPTIMIZED=$(echo "$LEVELS" | awk -v exempt=" $EXEMPT_MODULES " '
+  $2 != "-O" && index(exempt, " " $1 " ") == 0 { print $1, $2 }')
+
+if [[ -n "$UNOPTIMIZED" ]]; then
+  echo "REFUSING: modules were compiled unoptimized:" >&2
+  echo "$UNOPTIMIZED" >&2
   echo "(full log: $LOG)" >&2
   exit 1
 fi
 
-OPTIMIZED=$(grep -oE "module-name [A-Za-z0-9_]+ -O" "$LOG" | sort -u | sed 's/module-name //' | tr '\n' ' ' || true)
+# An incremental build that recompiled nothing is fine: changing the optimization
+# level changes the build description, so unchanged settings imply -O products.
+OPTIMIZED=$(echo "$LEVELS" | awk '$2 == "-O" { printf "%s ", $1 }')
 PRODUCT=$(grep -oE "/.*/Build/Products/$CONFIG/AppexSaverMinimal.app" "$LOG" | head -1 || true)
 
 echo "build ok; optimized this run: ${OPTIMIZED:-(nothing recompiled)}"

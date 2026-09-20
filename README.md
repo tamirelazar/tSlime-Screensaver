@@ -52,15 +52,25 @@ This project contains two targets:
 ./scripts/build-saver.sh
 ```
 
-This wraps `xcodebuild` with `SWIFT_OPTIMIZATION_LEVEL=-O` and fails the build if any
-module still compiled `-Onone`. The override matters: Xcode gives Swift package targets
-(SwiftTerm, PaperSaverKit) their own build settings, so a Debug build compiles them
-`-Onone` no matter what the project sets, and an `-Onone` SwiftTerm runs at roughly half
-the frame rate. Only a command-line override outranks the package's own setting.
+This wraps `xcodebuild` and fails the build if a module that runs in the screensaver
+compiled unoptimized. It no longer overrides `SWIFT_OPTIMIZATION_LEVEL`: our SwiftTerm
+fork asks for `-O` in its own `Package.swift`, so ⌘B in Xcode and a plain
+`xcodebuild -project AppexSaverMinimal.xcodeproj -scheme AppexSaverMinimal
+-configuration Debug build` produce a byte-identical extension binary. Measure on either.
 
-A plain `xcodebuild -project AppexSaverMinimal.xcodeproj -scheme AppexSaverMinimal
--configuration Debug build` (or ⌘B in Xcode) still works, but produces an unoptimized
-SwiftTerm — don't measure performance on it.
+That matters because Xcode gives a Swift package target its *own* build settings: a Debug
+build compiles it `-Onone` whatever the project sets, and an `-Onone` SwiftTerm runs at
+roughly half the frame rate. Only the package itself, or a command-line override, outranks
+that. Two consequences of fixing it in the manifest:
+
+- `unsafeFlags` is refused for a dependency pinned by **version**, so the fork must stay
+  pinned by branch or revision — and the patch is not upstreamable, since SwiftTerm's
+  own users pin it by version.
+- PaperSaverKit still compiles `-Onone` in Debug. It is linked into the host app only,
+  never the extension, so it is exempt from the check rather than fixed.
+
+`scripts/test-build-saver.sh` covers that check, including the case a naive `grep -Onone`
+now gets wrong: a correct SwiftTerm invocation contains `-Onone` followed by `-O`.
 
 ### Measuring
 
