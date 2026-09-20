@@ -108,6 +108,13 @@ final class SaverTuningSurface {
             // release that ARC doesn't know about, over-releasing the window and
             // crashing (EXC_BAD_ACCESS) when the array drops its reference on dismiss.
             window.isReleasedWhenClosed = false
+            // Nothing on this surface wants a cursor other than the arrow,
+            // and SwiftTerm's view claims an I-beam over its whole bounds
+            // through a cursor rect. Cursor rects resolve by geometry, so a
+            // control on the sheet with no rect of its own showed that
+            // I-beam. Turned off for the window rather than fought rect by
+            // rect.
+            window.disableCursorRects()
 
             let contentFrame = window.contentLayoutRect
             let container = NSView(frame: contentFrame)
@@ -141,6 +148,7 @@ final class SaverTuningSurface {
             host.window.makeKeyAndOrderFront(nil)
         }
         installInputMonitor()
+        NSCursor.arrow.set()
         logger.notice("diag tuning surface shown on \(self.windows.count, privacy: .public) screen(s)")
     }
 

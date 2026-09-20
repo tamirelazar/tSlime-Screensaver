@@ -38,6 +38,11 @@ final class PreviewView: NSView {
         wantsLayer = true
     }
 
+    /// The render is a picture of the saver, not a terminal: nothing in it
+    /// is clickable, selectable or focusable. Without this, a press on it
+    /// reaches SwiftTerm's view, which selects cells and takes key focus.
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
     override func makeBackingLayer() -> CALayer {
         let layer = CALayer()
         layer.backgroundColor = NSColor.black.cgColor

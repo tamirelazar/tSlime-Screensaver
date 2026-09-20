@@ -285,13 +285,9 @@ private final class DragHandleView: NSView {
     var onDrag: ((CGPoint) -> Void)?
     private var last: NSPoint = .zero
 
-    /// The terminal view beneath the sheet claims an I-beam over its whole
-    /// bounds; the sheet claims the arrow back over its own. The cursor
-    /// stays an arrow through a drag: a hand for the duration flickered.
-    override func resetCursorRects() {
-        addCursorRect(bounds, cursor: .arrow)
-    }
-
+    // No cursor of its own: the surface's windows manage no cursor rects,
+    // so the arrow holds everywhere, through a drag included — a hand for
+    // the duration flickered.
     override func mouseDown(with event: NSEvent) {
         last = event.locationInWindow
     }
