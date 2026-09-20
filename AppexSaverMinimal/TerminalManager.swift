@@ -170,10 +170,13 @@ final class TerminalManager {
             let w = Int(term.frame.width), h = Int(term.frame.height)
             logger.notice("diag launchProcess grid=\(t.cols, privacy: .public)x\(t.rows, privacy: .public) frame=\(w, privacy: .public)x\(h, privacy: .public)")
         }
-        // The frame rate tslime is asked for. Its default is 30 either way; it
-        // is spelled out because #12 measures the saver at more than one rate,
-        // and a rate that is never stated is a rate nobody can vary.
-        let fps = "30"
+        // The frame rate tslime is asked for. Sixty, decided in #24: the fork's
+        // redraw is vsync-paced now, so the saver presents every one of them.
+        // It costs 67% of a core against the 60% the destination first asked
+        // for -- knowingly, and #24 records what that spends. Never set this
+        // above what the saver can present: the parser is paid for every frame,
+        // including the ones a cap would drop.
+        let fps = "60"
         if let path = bundledTslimePath() {
             // Run the embedded binary directly
             terminalView?.startProcess(executable: path, args: ["--window-frame", "glow", "--fps", fps])
