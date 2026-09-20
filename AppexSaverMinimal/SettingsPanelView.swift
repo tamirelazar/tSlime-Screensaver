@@ -130,9 +130,9 @@ struct SettingsPanelView: View {
             titleRow
                 .padding(.bottom, 16)
             braille
-            Divider().padding(.vertical, 14)
+            Divider().padding(.vertical, 14).allowsHitTesting(false)
             frameRate
-            Divider().padding(.vertical, 14)
+            Divider().padding(.vertical, 14).allowsHitTesting(false)
             buttons
         }
         .padding(22)
@@ -223,6 +223,8 @@ struct SettingsPanelView: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            // The switch is the control; its label drags like any other text.
+            .allowsHitTesting(false)
         }
         .toggleStyle(.switch)
     }
@@ -284,14 +286,14 @@ private final class DragHandleView: NSView {
     private var last: NSPoint = .zero
 
     /// The terminal view beneath the sheet claims an I-beam over its whole
-    /// bounds; the sheet claims the arrow back over its own.
+    /// bounds; the sheet claims the arrow back over its own. The cursor
+    /// stays an arrow through a drag: a hand for the duration flickered.
     override func resetCursorRects() {
         addCursorRect(bounds, cursor: .arrow)
     }
 
     override func mouseDown(with event: NSEvent) {
         last = event.locationInWindow
-        NSCursor.closedHand.push()
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -299,9 +301,26 @@ private final class DragHandleView: NSView {
         onDrag?(CGPoint(x: now.x - last.x, y: now.y - last.y))
         last = now
     }
+}
 
-    override func mouseUp(with event: NSEvent) {
-        NSCursor.pop()
+/// The hosting view the surface positions. A press the SwiftUI hierarchy
+/// answers nobody for — and it does answer nobody for some of its own
+/// empty space — goes to the drag handle rather than falling through to the
+/// terminal view beneath, which would select cells there.
+final class SettingsPanelHostingView: NSHostingView<SettingsPanelView> {
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        if let hit = super.hitTest(point) { return hit }
+        guard let superview, bounds.contains(convert(point, from: superview)) else { return nil }
+        return dragHandle ?? self
+    }
+
+    private var dragHandle: NSView? {
+        func find(in view: NSView) -> NSView? {
+            if view is DragHandleView { return view }
+            for sub in view.subviews { if let v = find(in: sub) { return v } }
+            return nil
+        }
+        return find(in: self)
     }
 }
 

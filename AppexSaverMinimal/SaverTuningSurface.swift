@@ -179,7 +179,7 @@ final class SaverTuningSurface {
             onExit: { [weak self] in self?.dismiss() },
             onHide: { [weak self] in self?.hidePanel() },
             onDrag: { [weak self] delta in self?.movePanel(by: delta) })
-        let hosting = NSHostingView(rootView: view)
+        let hosting = SettingsPanelHostingView(rootView: view)
         // The sheet was decided over a black render in dark appearance; it
         // stays that way whatever the system theme is.
         hosting.appearance = NSAppearance(named: .darkAqua)
@@ -302,7 +302,7 @@ extension SaverTuningSurface {
         let model = SettingsPanelModel(stores: [SaverSettingsStore()])
         model.dotSizeFraction = min(model.dotSizeFraction + 0.05, BrailleSettings.dotSizeFractionRange.upperBound)
         let view = SettingsPanelView(model: model, onExit: {}, onHide: {}, onDrag: { _ in })
-        let hosting = NSHostingView(rootView: view)
+        let hosting = SettingsPanelHostingView(rootView: view)
         hosting.appearance = NSAppearance(named: .darkAqua)
         let size = hosting.fittingSize
         hosting.frame = NSRect(origin: .zero, size: size)
@@ -316,20 +316,29 @@ extension SaverTuningSurface {
         RunLoop.main.run(until: Date().addingTimeInterval(0.2))
         hosting.layoutSubtreeIfNeeded()
 
-        // What a press lands on, since that is the part of a drag that can be
-        // checked without a screen: everything that is not a control must
-        // reach the drag handle, and nothing may reach nobody — an empty hit
-        // is a press that falls through to the terminal view beneath.
-        // Hosting views are flipped, so y is measured from the top.
-        for (what, point) in [("title row", NSPoint(x: 120, y: 30)),
-                              ("corner padding", NSPoint(x: 8, y: 8)),
-                              ("dot-size label", NSPoint(x: 50, y: 100)),
-                              ("cost sentence", NSPoint(x: 200, y: 195)),
-                              ("hide caption", NSPoint(x: 130, y: 252)),
-                              ("close glyph", NSPoint(x: size.width - 32, y: 30)),
-                              ("dot-size slider", NSPoint(x: 220, y: 100))] {
-            let hit = hosting.hitTest(hosting.convert(point, to: hosting.superview))
-            print("render-panel: a press on the \(what) lands on \(hit.map { String(describing: type(of: $0)) } ?? "nothing")")
+        // What a press lands on, over the whole sheet on an 8 pt grid, since
+        // that is the part of a drag that can be checked without a screen:
+        // everything that is not a control must reach the drag handle, and
+        // nothing may reach nobody — an empty hit is a press that falls
+        // through to the terminal view beneath. Printed as a map, one
+        // character per class; hosting views are flipped, so the top row is
+        // the top of the sheet.
+        var legend: [String: Character] = ["DragHandleView": ".", "nothing": " "]
+        let letters = Array("HSWPBCDEFG")
+        var map = ""
+        for y in stride(from: CGFloat(4), to: size.height, by: 8) {
+            for x in stride(from: CGFloat(4), to: size.width, by: 8) {
+                let hit = hosting.hitTest(hosting.convert(NSPoint(x: x, y: y), to: hosting.superview))
+                let name = hit.map { String(describing: type(of: $0)) } ?? "nothing"
+                if legend[name] == nil { legend[name] = letters[min(legend.count - 2, letters.count - 1)] }
+                map.append(legend[name]!)
+            }
+            map.append("\n")
+        }
+        print("render-panel: hit map (8 pt grid)")
+        print(map, terminator: "")
+        for (name, char) in legend.sorted(by: { $0.value < $1.value }) {
+            print("render-panel:   '\(char)' = \(name)")
         }
 
         let scale: CGFloat = 2
