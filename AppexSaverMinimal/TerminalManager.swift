@@ -39,13 +39,29 @@ final class TerminalManager {
     /// staged value from a saved one, which is the point — what the user
     /// tunes is drawn by this code path, not a parallel one.
     private let settings: SaverSettingsStore
+
+    /// A frame rate this manager runs at instead of the saved one, for the
+    /// life of the manager. `nil` — every case but one — means "follow the
+    /// setting", which is what the saver and wallpaper instances do.
+    ///
+    /// The one case is the System Settings preview instance (#28, #29): the
+    /// thumbnail is not the tuning surface, so it is capped at 30 fps
+    /// whatever the user saved. It is expressed as a rate rather than an
+    /// `isPreview` flag because `TerminalManager` is shared with the host app
+    /// and has no business knowing which kind of instance owns it; the view
+    /// that does know decides.
+    ///
+    /// It also silences the frame-rate callback entirely — see `attach(to:)`.
+    private let frameRateOverride: FrameRate?
     #else
     private var placeholderLabel: NSTextField?
     #endif
 
     #if canImport(SwiftTerm)
-    init(settings: SaverSettingsStore = SaverSettingsStore()) {
+    init(settings: SaverSettingsStore = SaverSettingsStore(),
+         frameRateOverride: FrameRate? = nil) {
         self.settings = settings
+        self.frameRateOverride = frameRateOverride
     }
     #endif
 
@@ -89,8 +105,17 @@ final class TerminalManager {
             }
             // Separate callback because it is applied separately: the braille
             // values are an assignment, the frame rate is a relaunch.
-            settings.onFrameRateChange = { [weak self] updated in
-                self?.relaunchProcess(at: updated)
+            //
+            // An overridden manager does not install it at all. The relaunch
+            // would terminate the child and fork a new one to arrive at the
+            // same --fps the old one already had: a frozen frame for ~290 ms
+            // in exchange for nothing.
+            if let override = frameRateOverride {
+                logger.notice("diag frame rate pinned at fps=\(override.argument, privacy: .public); not watching the setting")
+            } else {
+                settings.onFrameRateChange = { [weak self] updated in
+                    self?.relaunchProcess(at: updated)
+                }
             }
             // Re-reads as it starts, so a change made while this manager had
             // no view is picked up rather than waiting for the next one.
@@ -227,7 +252,12 @@ final class TerminalManager {
         // defaulting to the sixty decided in #24. It is a launch argument, so
         // this is the only place it can be applied, and changing it means
         // relaunching the child: see `relaunchProcess(at:)`.
-        let fps = settings.frameRate.argument
+        //
+        // `source=` is on the line so the log alone says which instance got
+        // which rate: with the settings pane open there are two of them at
+        // once, and only one is overridden (#29).
+        let fps = (frameRateOverride ?? settings.frameRate).argument
+        let source = frameRateOverride == nil ? "settings" : "override"
         if let path = bundledTslimePath() {
             // Run the embedded binary directly
             terminalView?.startProcess(executable: path, args: ["--window-frame", "glow", "--fps", fps])
@@ -235,7 +265,7 @@ final class TerminalManager {
             // Fallback to PATH if developer hasn’t embedded yet
             terminalView?.startProcess(executable: "/usr/bin/env", args: ["tslime", "--window-frame", "glow", "--fps", fps])
         }
-        logger.notice("diag launchProcess fps=\(fps, privacy: .public)")
+        logger.notice("diag launchProcess fps=\(fps, privacy: .public) source=\(source, privacy: .public)")
         applyWindowSize()
         disableOutputPostProcessing()
     }
@@ -254,6 +284,14 @@ final class TerminalManager {
     /// visibly does nothing until the next time the screensaver starts.
     private func relaunchProcess(at rate: FrameRate) {
         guard isRunning, terminalView != nil else { return }
+        // `attach(to:)` never installs the callback that calls this when the
+        // rate is overridden, so this is belt and braces -- but a relaunch
+        // here would restart the child at the overridden rate anyway, making
+        // the churn invisible in the log rather than absent.
+        guard frameRateOverride == nil else {
+            logger.notice("diag ignoring fps=\(rate.rawValue, privacy: .public); this manager is pinned")
+            return
+        }
         logger.notice("diag relaunching tslime at fps=\(rate.rawValue, privacy: .public)")
         terminalView?.terminate()
         launchProcess()

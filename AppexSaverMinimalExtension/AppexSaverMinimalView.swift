@@ -29,9 +29,20 @@ private let logger = AppexLog.logger("View")
 
 final class AppexSaverMinimalView: ScreenSaverView {
 
-    private let terminal = TerminalManager()
+    private let terminal: TerminalManager
 
     override init?(frame: NSRect, isPreview: Bool) {
+        // The System Settings preview instance runs tslime at 30 fps whatever
+        // the user saved, and ignores later changes to the setting (#28, #29).
+        // It is the thumbnail in the settings pane, not the tuning surface --
+        // that is the host app's panel. The pane starts *two* instances, the
+        // other being the wallpaper instance, which has no lever at all: it
+        // is a saver instance in every observable way. So this is the whole
+        // lever there is, and it halves one of the two.
+        //
+        // `isPreview` comes from the host's handshake (#22); the value the
+        // framework would compute here has never been anything but false.
+        terminal = TerminalManager(frameRateOverride: isPreview ? .thirty : nil)
         logger.info("init(frame: \(frame.size.width, privacy: .public)x\(frame.size.height, privacy: .public), isPreview: \(isPreview))")
         super.init(frame: frame, isPreview: isPreview)
         wantsLayer = true
@@ -40,6 +51,10 @@ final class AppexSaverMinimalView: ScreenSaverView {
     }
 
     required init?(coder: NSCoder) {
+        // Never reached for an appex saver: the framework builds the view
+        // through init(frame:isPreview:). No archive carries isPreview, so
+        // this path follows the setting like any saver instance.
+        terminal = TerminalManager()
         super.init(coder: coder)
         wantsLayer = true
     }
