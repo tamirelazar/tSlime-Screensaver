@@ -184,11 +184,16 @@ cleanup() {
   exit $rc
 }
 
-# Lets scripts/test-measure-saver.sh source the helpers above without launching
-# a saver; everything below this line is the measurement proper. The EXIT trap
-# is armed *after* it, because a sourcing script inherits the trap and would
-# end a session it never started -- which is why running the unit tests used to
-# tear down whatever saver happened to be on screen.
+# Lets another script source the helpers above without launching a saver;
+# everything below this line is the measurement proper. The EXIT trap is armed
+# *after* it, because a sourcing script inherits the trap and would end a
+# session it never started -- which is why running the unit tests used to tear
+# down whatever saver happened to be on screen.
+#
+# Source this *before* setting your own configuration, and with no positional
+# parameters. Everything above this line has already run in your shell: REPO,
+# OUT, BUILD and KEEP are assigned here, and the argument parser above rejects
+# any option this script does not know.
 [[ "${MEASURE_SAVER_SOURCE_ONLY:-0}" == "1" ]] && return 0
 
 trap cleanup EXIT INT TERM

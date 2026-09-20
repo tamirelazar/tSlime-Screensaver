@@ -17,11 +17,13 @@ fails=0
 # cannot drift from what runs. Everything below the argument parsing is skipped.
 EXEMPT_MODULES=$(awk -F'"' '/^EXEMPT_MODULES=/ { print $2 }' "$REPO/scripts/build-saver.sh")
 eval "$(awk '/^effective_levels\(\) \{/, /^\}/' "$REPO/scripts/build-saver.sh")"
+eval "$(awk '/^unoptimized_modules\(\) \{/, /^\}/' "$REPO/scripts/build-saver.sh")"
 
-# Mirrors the refusal rule in build-saver.sh.
+# The same two steps build-saver.sh runs, including the `echo` — a hand-written
+# mirror used to pipe instead, which hid the blank line an empty build produces.
 unoptimized() {
-  effective_levels "$1" | awk -v exempt=" $EXEMPT_MODULES " '
-    $2 != "-O" && index(exempt, " " $1 " ") == 0 { print $1, $2 }'
+  local levels; levels=$(effective_levels "$1")
+  echo "$levels" | unoptimized_modules
 }
 
 check() {

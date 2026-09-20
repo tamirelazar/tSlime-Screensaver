@@ -70,9 +70,21 @@ effective_levels() {
   ' "$1" | sort -u
 }
 
+# The refusal rule itself, kept a function so scripts/test-build-saver.sh can
+# eval it instead of restating it — a hand-written copy of this rule is what let
+# the blank-line bug below live through six passing checks.
+#
+# NF == 2 is not cosmetic: an incremental build that recompiled nothing produces
+# no levels at all, and a caller that pipes an empty string through `echo` hands
+# awk one blank line — a module named "" at level "", which is not -O, is not
+# exempt, and used to refuse the build with an empty list of offenders.
+unoptimized_modules() {               # reads levels on stdin
+  awk -v exempt=" $EXEMPT_MODULES " '
+    NF == 2 && $2 != "-O" && index(exempt, " " $1 " ") == 0 { print $1, $2 }'
+}
+
 LEVELS=$(effective_levels "$LOG")
-UNOPTIMIZED=$(echo "$LEVELS" | awk -v exempt=" $EXEMPT_MODULES " '
-  $2 != "-O" && index(exempt, " " $1 " ") == 0 { print $1, $2 }')
+UNOPTIMIZED=$(echo "$LEVELS" | unoptimized_modules)
 
 if [[ -n "$UNOPTIMIZED" ]]; then
   echo "REFUSING: modules were compiled unoptimized:" >&2
