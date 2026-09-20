@@ -6,9 +6,10 @@ surface and opens System Settings — should lead with, and how its states
 should read. Not the settings panel (#26), not the tuning surface.
 
 ```
-./run.sh shots/dark              # build, render every candidate in every state
-./run.sh shots/light --light     # the same in light appearance
-./run.sh --live                  # a real window with a switcher strip under it
+./run.sh shots/d-dark                    # round 2: D in five implementations, every state
+./run.sh shots/d-light --light           # the same in light appearance
+./run.sh shots/dark --round1             # round 1: the five shapes
+./run.sh --live [--round1]               # a real window with a switcher strip under it
 ```
 
 - The candidates are **real SwiftUI windows** driven by a stub of
@@ -54,3 +55,27 @@ the rename itself is not decided here.
 The current window has no width. `.fixedSize()` on the outer stack gives the
 path `Text` its ideal single-line width, so on this machine the real window is
 **1195 x 797 pt** once the extension is registered — filed as #33.
+
+## Round 2: D, in the settings panel's style
+
+Verdict on round 1 (2026-09-20): **D, the grouped form**, with *Open Screen
+Saver Settings* moved into the Screensaver section and no Version or Path
+rows. The shape is settled; these five are implementations of it that all
+share the panel's idiom (#26/#27) — 22 pt padding on a 460 pt sheet, the
+title3 title row, a trailing-label grid at 16/12, dividers at 14, the switch
+with a sentence under it, one prominent button — and go as far as that allows.
+Shots under `shots/d-dark` and `shots/d-light`.
+
+| | what it takes from the panel | width |
+|---|---|---|
+| D4 decided grouped form | nothing but the decided edits; the native grouped form, the control for the range | 520 |
+| D1 label grid | the Grid: a trailing label per section, status and its one button in the value column, Refresh in the Hide slot | 460 |
+| D5 captioned rows | the Smooth-motion row with a button where the switch is: title, sentence, one control | 460 |
+| D2 switches | the switch itself: each state is a switch with a sentence saying what on does; the screensaver switch cannot go off from here and says so | 460 |
+| D3 sheet over the saver | everything: the label grid on material over a 1:1 crop of the render, close glyph in the title row, no title bar of its own | 540 |
+
+The one prominent button per window is the next thing to do — Install, then
+Set as Screensaver, then Tune — the way Accept is the one on the panel. D3's
+material is faked as `prototype/panel-look` faked it (a blur of what is under
+the sheet, then a tint); in the app it would be `.regularMaterial` over a
+live `PreviewView`, which is the tuning surface in a window.

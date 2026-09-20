@@ -803,10 +803,13 @@ struct Candidate {
     let title: String
     let summary: String
     let windowTitle: String
+    /// No title bar of its own: the content runs to the top and the traffic
+    /// lights sit over it (fullSizeContentView with a transparent title bar).
+    var chromeless: Bool = false
     let make: (Stub, Scenario) -> AnyView
 }
 
-let candidates: [Candidate] = [
+let round1: [Candidate] = [
     Candidate(key: "00-current", title: "00  current",
               summary: "icon + big title · two status group boxes · two buttons · caption",
               windowTitle: "AppexSaverMinimal",
@@ -827,6 +830,439 @@ let candidates: [Candidate] = [
               summary: "System Settings idiom · a section per concern · label / value rows",
               windowTitle: "tSlime",
               make: { stub, sc in AnyView(GroupedFormWindow(stub: stub, height: groupedFormHeight(sc.state))) }),
+]
+
+
+// MARK: - Round 2: D, the grouped form, in the settings panel's style (#32 verdict)
+//
+// The shape is settled — a section for the extension, one for the
+// screensaver (with Open Screen Saver Settings in it), one for the look; no
+// version, no path. These five differ in how far they take the panel's own
+// idiom: its 22 pt padding on a 460 pt sheet, the title3 title row, the
+// trailing-label grid at 16/12, dividers at 14, the switch with a sentence
+// under it, and exactly one prominent button.
+
+let sheetPad: CGFloat = 22
+let sheetWidth: CGFloat = 460
+
+/// The panel's title row with the app's name where "Screensaver Settings" is.
+struct SheetTitle: View {
+    var close = false
+    var body: some View {
+        HStack(spacing: 10) {
+            AppIcon(size: 26)
+            Text("tSlime").font(.title3.weight(.semibold))
+            Spacer()
+            if close {
+                Image(systemName: "xmark.circle.fill").font(.title2).foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+/// The panel's Hide row, repurposed: a plain button at the left with a
+/// tertiary caption beside it.
+struct SheetFoot: View {
+    @ObservedObject var stub: Stub
+    var body: some View {
+        HStack {
+            Button("Refresh") { stub.refresh() }
+            Text(stub.state.statusMessage).font(.caption).foregroundStyle(.tertiary)
+            Spacer()
+            if stub.busy { ProgressView().controlSize(.small) }
+        }
+    }
+}
+
+struct SheetDivider: View {
+    var body: some View { Divider().padding(.vertical, 14) }
+}
+
+/// The panel's hijack alarm, in its wording, as a row of the sheet.
+struct SheetHijack: View {
+    let plist: String
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Saver settings will not apply")
+                Text("A container holds a preferences file for this app's settings domain, so this app writes there while the screensaver reads ~/Library/Preferences. Delete it and relaunch.")
+                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                Text(plist).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(2).truncationMode(.middle)
+            }
+        }
+    }
+}
+
+// D1 — label grid. The panel's Grid, a trailing label per section, the
+// status and its one button in the value column.
+struct LabelGridSheet: View {
+    @ObservedObject var stub: Stub
+    var close = false
+    var s: AppState { stub.state }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SheetTitle(close: close).padding(.bottom, 16)
+            if let plist = s.hijackedPlist { SheetHijack(plist: plist); SheetDivider() }
+            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
+                GridRow {
+                    Text("Extension").gridColumnAlignment(.trailing)
+                    HStack {
+                        StatusDot(on: s.isInstalled)
+                        Text(s.isInstalled ? "Registered with pluginkit" : "Not registered")
+                        Spacer()
+                        if s.isInstalled { Button("Uninstall") { stub.uninstall() }.disabled(stub.busy) }
+                        else { Button("Install") { stub.install() }.buttonStyle(.borderedProminent).disabled(stub.busy) }
+                    }
+                }
+                if let e = s.installError { GridRow { Text(""); Text(e).font(.caption).foregroundStyle(.red) } }
+            }
+            SheetDivider()
+            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
+                GridRow {
+                    Text("Screensaver").gridColumnAlignment(.trailing)
+                    HStack {
+                        StatusDot(on: s.isActive)
+                        Text(s.isActive ? "Yours, on every display" : "Not yours")
+                        Spacer()
+                        Button("Set as Screensaver") { stub.enable() }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(!s.isInstalled || s.isActive || stub.busy)
+                    }
+                }
+                if let e = s.activationError {
+                    GridRow { Text(""); Text(e).font(.caption).foregroundStyle(.red).fixedSize(horizontal: false, vertical: true) }
+                }
+                GridRow {
+                    Text("")
+                    HStack {
+                        Button("Open Screen Saver Settings") { stub.openSystemSettings() }
+                        Text("to preview or time it").font(.caption).foregroundStyle(.tertiary)
+                        Spacer()
+                    }
+                }
+            }
+            SheetDivider()
+            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
+                GridRow {
+                    Text("Look").gridColumnAlignment(.trailing)
+                    HStack {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Braille, dot size, frame rate")
+                            Text("Over a live full-screen render").font(.caption).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button("Tune…") { stub.tune() }
+                            .buttonStyle(s.isActive ? .borderedProminent : .bordered)
+                    }
+                }
+            }
+            SheetDivider()
+            SheetFoot(stub: stub)
+        }
+        .padding(sheetPad)
+        .frame(width: sheetWidth)
+    }
+}
+
+// The one prominent button per window is the next thing to do. SwiftUI
+// cannot switch button styles on a Bool directly; this can.
+extension View {
+    @ViewBuilder
+    func buttonStyle(_ prominent: Bool) -> some View {
+        if prominent { self.buttonStyle(.borderedProminent) } else { self.buttonStyle(.bordered) }
+    }
+}
+extension Button {
+    func buttonStyle(_ style: PrimitiveButtonStyleChoice) -> some View {
+        Group {
+            switch style {
+            case .borderedProminent: self.buttonStyle(BorderedProminentButtonStyle())
+            case .bordered: self.buttonStyle(BorderedButtonStyle())
+            }
+        }
+    }
+}
+enum PrimitiveButtonStyleChoice { case borderedProminent, bordered }
+
+// D2 — switches. Each state is the panel's "Smooth motion" row: a switch
+// with a sentence under the title saying what it does. Turning a switch on
+// installs or activates; the screensaver switch cannot be turned off from
+// here, which its sentence says.
+struct SwitchesSheet: View {
+    @ObservedObject var stub: Stub
+    var s: AppState { stub.state }
+
+    private var registered: Binding<Bool> {
+        Binding(get: { s.isInstalled }, set: { $0 ? stub.install() : stub.uninstall() })
+    }
+    private var yours: Binding<Bool> {
+        Binding(get: { s.isActive }, set: { if $0 { stub.enable() } })
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SheetTitle().padding(.bottom, 16)
+            if let plist = s.hijackedPlist { SheetHijack(plist: plist); SheetDivider() }
+            Toggle(isOn: registered) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Registered with macOS")
+                    Text(s.isInstalled
+                         ? "Version \(s.installedVersion ?? "?"), with pluginkit. Off unregisters it."
+                         : "Registers the extension with pluginkit. macOS usually finds a fresh build by itself.")
+                        .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    if let e = s.installError { Text(e).font(.caption).foregroundStyle(.red) }
+                }
+            }
+            .toggleStyle(.switch).disabled(stub.busy)
+            SheetDivider()
+            Toggle(isOn: yours) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Your screensaver")
+                    Text(s.isActive
+                         ? "On every display. To pick another, use System Settings."
+                         : "Sets tSlime as the screensaver on every display.")
+                        .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    if let e = s.activationError { Text(e).font(.caption).foregroundStyle(.red).fixedSize(horizontal: false, vertical: true) }
+                }
+            }
+            .toggleStyle(.switch).disabled(!s.isInstalled || s.isActive || stub.busy)
+            HStack {
+                Spacer()
+                Button("Open Screen Saver Settings") { stub.openSystemSettings() }
+            }
+            .padding(.top, 12)
+            SheetDivider()
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Look")
+                    Text("Braille, dot size and frame rate, over a live full-screen render.")
+                        .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer()
+                Button("Tune…") { stub.tune() }.buttonStyle(s.isActive)
+            }
+            SheetDivider()
+            SheetFoot(stub: stub)
+        }
+        .padding(sheetPad)
+        .frame(width: sheetWidth)
+    }
+}
+
+// D5 — captioned rows. The Smooth-motion row again, but with a button
+// where the switch is: title, a sentence saying what is true, one control.
+struct CaptionedRow<Control: View>: View {
+    let title: String
+    let caption: String
+    var error: String? = nil
+    @ViewBuilder let control: () -> Control
+    var body: some View {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                Text(caption).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                if let error { Text(error).font(.caption).foregroundStyle(.red).fixedSize(horizontal: false, vertical: true) }
+            }
+            Spacer(minLength: 16)
+            control()
+        }
+    }
+}
+
+struct CaptionedRowsSheet: View {
+    @ObservedObject var stub: Stub
+    var s: AppState { stub.state }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SheetTitle().padding(.bottom, 16)
+            if let plist = s.hijackedPlist { SheetHijack(plist: plist); SheetDivider() }
+            CaptionedRow(title: "Extension",
+                         caption: s.isInstalled
+                            ? "Registered with pluginkit, version \(s.installedVersion ?? "?")."
+                            : "Not registered. macOS usually finds a fresh build by itself.",
+                         error: s.installError) {
+                if s.isInstalled { Button("Uninstall") { stub.uninstall() }.disabled(stub.busy) }
+                else { Button("Install") { stub.install() }.buttonStyle(.borderedProminent).disabled(stub.busy) }
+            }
+            SheetDivider()
+            CaptionedRow(title: "Screensaver",
+                         caption: s.isActive ? "Yours, on every display." : (s.isInstalled ? "Not yours yet." : "Not yours yet; register the extension first."),
+                         error: s.activationError) {
+                Button("Set as Screensaver") { stub.enable() }
+                    .buttonStyle(s.isInstalled && !s.isActive)
+                    .disabled(!s.isInstalled || s.isActive || stub.busy)
+            }
+            CaptionedRow(title: "System Settings", caption: "Where the screensaver is previewed and timed.") {
+                Button("Open Screen Saver Settings") { stub.openSystemSettings() }
+            }
+            .padding(.top, 12)
+            SheetDivider()
+            CaptionedRow(title: "Look", caption: "Braille, dot size and frame rate, over a live full-screen render.") {
+                Button("Tune…") { stub.tune() }.buttonStyle(s.isActive)
+            }
+            SheetDivider()
+            SheetFoot(stub: stub)
+        }
+        .padding(sheetPad)
+        .frame(width: sheetWidth)
+    }
+}
+
+// D4 — the native grouped form with the decided edits: no version, no path,
+// Open Screen Saver Settings under Screensaver. The control for the range.
+struct DecidedGroupedForm: View {
+    @ObservedObject var stub: Stub
+    let height: CGFloat
+    var s: AppState { stub.state }
+
+    var body: some View {
+        Form {
+            Section("Extension") {
+                LabeledContent("Status") {
+                    HStack(spacing: 6) { StatusDot(on: s.isInstalled); Text(s.isInstalled ? "Registered" : "Not registered") }
+                }
+                if let e = s.installError { Text(e).font(.caption).foregroundStyle(.red) }
+                HStack {
+                    Spacer()
+                    Button("Refresh") { stub.refresh() }
+                    if s.isInstalled { Button("Uninstall") { stub.uninstall() }.disabled(stub.busy) }
+                    else { Button("Install") { stub.install() }.buttonStyle(.borderedProminent).disabled(stub.busy) }
+                }
+            }
+            Section("Screensaver") {
+                LabeledContent("Status") {
+                    HStack(spacing: 6) { StatusDot(on: s.isActive); Text(s.isActive ? "Active on every display" : "Not active") }
+                }
+                if let e = s.activationError { Text(e).font(.caption).foregroundStyle(.red) }
+                HStack {
+                    Spacer()
+                    Button("Refresh") { stub.refresh() }
+                    Button("Set as Screensaver") { stub.enable() }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(!s.isInstalled || s.isActive || stub.busy)
+                }
+                LabeledContent("System Settings") {
+                    Button("Open Screen Saver Settings") { stub.openSystemSettings() }
+                }
+            }
+            Section("Look") {
+                LabeledContent {
+                    Button("Tune…") { stub.tune() }.buttonStyle(.borderedProminent)
+                } label: {
+                    Text("Braille, dot size, frame rate")
+                    Text("Over a live full-screen render")
+                }
+            }
+            if let plist = s.hijackedPlist {
+                Section { HijackBanner(plist: plist).listRowInsets(EdgeInsets()) }
+            }
+            Section {
+                Text(s.statusMessage).font(.caption).foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .listRowBackground(Color.clear)
+            }
+        }
+        .formStyle(.grouped)
+        .frame(width: 520, height: height)
+    }
+}
+
+func decidedFormHeight(_ s: AppState) -> CGFloat {
+    var h: CGFloat = 470
+    if s.installError != nil { h += 28 }
+    if s.activationError != nil { h += 28 }
+    if s.hijackedPlist != nil { h += 150 }
+    return h
+}
+
+// D3 — the sheet over the saver. What the panel is: the label grid on
+// material, floating over a 1:1 crop of the render, in a window with no
+// title bar of its own. The material is faked the way the panel prototype
+// faked it — a blur of what is under the sheet, then a tint — because
+// `.regularMaterial` cannot render offscreen.
+
+let backdrop2x: CGImage = {
+    let here = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
+    let root = FileManager.default.fileExists(atPath: here.appendingPathComponent("frames").path)
+        ? here : here.deletingLastPathComponent()
+    let text = try! String(contentsOf: root.appendingPathComponent("frames/03-dense.txt"), encoding: .utf8)
+    return renderBackdrop(grid: parseFrame(text), canvas: CGSize(width: 1920, height: 1080), scale: 2)
+}()
+let ciContext = CIContext()
+
+/// A `size`-point window's worth of the render, centred on the trails'
+/// convergence, at 2x; and the same, blurred for the material.
+func saverCrop(size: CGSize) -> (NSImage, NSImage) {
+    let scale: CGFloat = 2
+    let centre = CGPoint(x: 960, y: 560)
+    let px = CGRect(x: (centre.x - size.width / 2) * scale, y: (centre.y - size.height / 2) * scale,
+                    width: size.width * scale, height: size.height * scale)
+    let crop = backdrop2x.cropping(to: px)!
+    let ci = CIImage(cgImage: crop).clampedToExtent()
+        .applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: 24])
+        .cropped(to: CGRect(x: 0, y: 0, width: crop.width, height: crop.height))
+    let blurred = ciContext.createCGImage(ci, from: ci.extent)!
+    return (NSImage(cgImage: crop, size: size), NSImage(cgImage: blurred, size: size))
+}
+
+func measure<V: View>(_ view: V) -> CGSize {
+    let hosting = NSHostingView(rootView: view)
+    hosting.appearance = NSAppearance(named: .darkAqua)
+    return hosting.fittingSize
+}
+
+struct SheetOverSaverWindow: View {
+    @ObservedObject var stub: Stub
+    let size: CGSize
+    let crop: NSImage
+    let blurred: NSImage
+
+    var body: some View {
+        ZStack {
+            Image(nsImage: crop).resizable().frame(width: size.width, height: size.height)
+            LabelGridSheet(stub: stub, close: true)
+                .background(
+                    Image(nsImage: blurred).resizable().frame(width: size.width, height: size.height)
+                        .overlay(Color(white: 0.13).opacity(0.45))
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.10)))
+        }
+        .frame(width: size.width, height: size.height)
+    }
+}
+
+func sheetOverSaver(_ stub: Stub) -> AnyView {
+    let sheet = measure(LabelGridSheet(stub: stub, close: true))
+    let size = CGSize(width: sheet.width + 80, height: sheet.height + 80)
+    let (crop, blurred) = saverCrop(size: size)
+    return AnyView(SheetOverSaverWindow(stub: stub, size: size, crop: crop, blurred: blurred))
+}
+
+let round2: [Candidate] = [
+    Candidate(key: "D4-decided-grouped", title: "D4  decided grouped form",
+              summary: "the native grouped form with the decided edits · the control for the range",
+              windowTitle: "tSlime",
+              make: { stub, sc in AnyView(DecidedGroupedForm(stub: stub, height: decidedFormHeight(sc.state))) }),
+    Candidate(key: "D1-label-grid", title: "D1  label grid",
+              summary: "the panel's grid: a trailing label per section, status and its button in the value column",
+              windowTitle: "tSlime",
+              make: { stub, _ in AnyView(LabelGridSheet(stub: stub)) }),
+    Candidate(key: "D5-captioned-rows", title: "D5  captioned rows",
+              summary: "the Smooth-motion row with a button in the switch's place: title, sentence, one control",
+              windowTitle: "tSlime",
+              make: { stub, _ in AnyView(CaptionedRowsSheet(stub: stub)) }),
+    Candidate(key: "D2-switches", title: "D2  switches",
+              summary: "each state is a switch with a sentence under it; on installs or activates",
+              windowTitle: "tSlime",
+              make: { stub, _ in AnyView(SwitchesSheet(stub: stub)) }),
+    Candidate(key: "D3-sheet-over-saver", title: "D3  sheet over the saver",
+              summary: "the label grid on material over a 1:1 crop of the render · no title bar · the panel itself",
+              windowTitle: "tSlime", chromeless: true,
+              make: { stub, _ in sheetOverSaver(stub) }),
 ]
 
 // MARK: - Offscreen rendering, 2x, inside a mock title bar
@@ -871,7 +1307,8 @@ let desktopMargin: CGFloat = 44
 /// The content inside a mock titled window on a flat desktop, with a shadow,
 /// so the candidate reads as a window and its size against the title bar can
 /// be judged.
-func windowImage(content: CGImage, size: CGSize, title: String, dark: Bool, scale: CGFloat) -> CGImage {
+func windowImage(content: CGImage, size: CGSize, title: String, dark: Bool, scale: CGFloat, chromeless: Bool = false) -> CGImage {
+    let titleBarHeight: CGFloat = chromeless ? 0 : titleBarHeight
     let w = size.width + desktopMargin * 2
     let h = size.height + titleBarHeight + desktopMargin * 2
     let ctx = CGContext(data: nil, width: Int(w * scale), height: Int(h * scale), bitsPerComponent: 8,
@@ -893,24 +1330,28 @@ func windowImage(content: CGImage, size: CGSize, title: String, dark: Bool, scal
     ctx.saveGState()
     ctx.addPath(path); ctx.clip()
     ctx.draw(content, in: CGRect(x: frame.minX, y: frame.minY, width: size.width, height: size.height))
-    let bar = CGRect(x: frame.minX, y: frame.maxY - titleBarHeight, width: size.width, height: titleBarHeight)
-    ctx.setFillColor(NSColor(white: dark ? 0.19 : 0.93, alpha: 1).cgColor)
-    ctx.fill(bar)
-    ctx.setFillColor(NSColor(white: dark ? 0 : 0.7, alpha: 0.5).cgColor)
-    ctx.fill(CGRect(x: bar.minX, y: bar.minY, width: bar.width, height: 1 / scale))
+    let bar = CGRect(x: frame.minX, y: frame.maxY - (chromeless ? 28 : titleBarHeight), width: size.width, height: chromeless ? 28 : titleBarHeight)
+    if !chromeless {
+        ctx.setFillColor(NSColor(white: dark ? 0.19 : 0.93, alpha: 1).cgColor)
+        ctx.fill(bar)
+        ctx.setFillColor(NSColor(white: dark ? 0 : 0.7, alpha: 0.5).cgColor)
+        ctx.fill(CGRect(x: bar.minX, y: bar.minY, width: bar.width, height: 1 / scale))
+    }
     for (i, color) in [NSColor(srgbRed: 1, green: 0.373, blue: 0.341, alpha: 1),
                        NSColor(srgbRed: 0.996, green: 0.737, blue: 0.180, alpha: 1),
                        NSColor(srgbRed: 0.157, green: 0.784, blue: 0.251, alpha: 1)].enumerated() {
         ctx.setFillColor(color.cgColor)
         ctx.fillEllipse(in: CGRect(x: bar.minX + 13 + CGFloat(i) * 20, y: bar.midY - 6, width: 12, height: 12))
     }
-    let label = NSAttributedString(string: title, attributes: [
-        .font: NSFont.systemFont(ofSize: 13, weight: .semibold),
-        .foregroundColor: NSColor(white: dark ? 1 : 0, alpha: dark ? 0.7 : 0.75)])
-    let line = CTLineCreateWithAttributedString(label)
-    let width = CTLineGetTypographicBounds(line, nil, nil, nil)
-    ctx.textPosition = CGPoint(x: bar.midX - width / 2, y: bar.midY - 4.5)
-    CTLineDraw(line, ctx)
+    if !chromeless {
+        let label = NSAttributedString(string: title, attributes: [
+            .font: NSFont.systemFont(ofSize: 13, weight: .semibold),
+            .foregroundColor: NSColor(white: dark ? 1 : 0, alpha: dark ? 0.7 : 0.75)])
+        let line = CTLineCreateWithAttributedString(label)
+        let width = CTLineGetTypographicBounds(line, nil, nil, nil)
+        ctx.textPosition = CGPoint(x: bar.midX - width / 2, y: bar.midY - 4.5)
+        CTLineDraw(line, ctx)
+    }
     ctx.restoreGState()
 
     ctx.addPath(path)
@@ -958,6 +1399,8 @@ func contactSheet(tiles: [(label: String, sub: String, image: CGImage)], cols: I
 }
 
 // MARK: - Live mode: a real window with a switcher strip under the candidate
+
+var candidates: [Candidate] = []
 
 final class LiveNav: ObservableObject {
     @Published var candidate = 1
@@ -1064,15 +1507,17 @@ _ = NSApplication.shared
 NSApp.setActivationPolicy(.prohibited)
 
 let args = Array(CommandLine.arguments.dropFirst())
-if args.first == "--live" {
+if args.contains("--live") {
+    candidates = args.contains("--round1") ? round1 : round2
     runLive()
     exit(0)
 }
 guard let outArg = args.first(where: { !$0.hasPrefix("--") }) else {
-    FileHandle.standardError.write("usage: AppLook <outdir> [--light]  |  AppLook --live\n".data(using: .utf8)!)
+    FileHandle.standardError.write("usage: AppLook <outdir> [--light] [--round1]  |  AppLook --live [--round1]\n".data(using: .utf8)!)
     exit(2)
 }
 let dark = !args.contains("--light")
+candidates = args.contains("--round1") ? round1 : round2
 let outDir = URL(fileURLWithPath: outArg)
 try? FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true)
 let scale: CGFloat = 2
@@ -1082,7 +1527,7 @@ for sc in scenarios {
     for c in candidates {
         let stub = Stub(sc.state)
         let (content, size) = renderContent(c.make(stub, sc), dark: dark, scale: scale)
-        let img = windowImage(content: content, size: size, title: c.windowTitle, dark: dark, scale: scale)
+        let img = windowImage(content: content, size: size, title: c.windowTitle, dark: dark, scale: scale, chromeless: c.chromeless)
         images["\(c.key)|\(sc.key)"] = (img, size)
         writePNG(img, to: outDir.appendingPathComponent("\(c.key)--\(sc.key).png"))
         print(String(format: "%-18@ %-14@ window %4.0f x %3.0f pt", c.key as NSString, sc.key as NSString, size.width, size.height + titleBarHeight))
