@@ -5,7 +5,8 @@
 //  The panel that floats over the live saver render, and the model behind it.
 //
 //  The look is the one #26 settled by eye: a centred sheet, ~460 pt wide on
-//  light material, draggable by its title row; the braille source, then the
+//  light material, draggable from anywhere that is not a control; the
+//  braille source, then the
 //  two fractions as sliders with numeric readouts; the frame rate as a
 //  "Smooth motion" switch that says what it costs; and a bottom row with Hide
 //  at the left, Discard and a prominent Accept at the right. Exit is the
@@ -146,15 +147,13 @@ struct SettingsPanelView: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Self.cornerRadius))
     }
 
-    /// Handle glyph, title, close glyph. The glyph only says the sheet
-    /// moves; the whole sheet is the drag region, which is why every text
-    /// on it is `allowsHitTesting(false)` — a label takes the hit otherwise,
-    /// and a press on it would then go to nobody instead of the handle.
+    /// Title and close glyph. The whole sheet is the drag region, so the
+    /// handle glyph #26 drew at the left went: it announced a strip that no
+    /// longer exists. Every text on the sheet is `allowsHitTesting(false)` —
+    /// a label takes the hit otherwise, and a press on it would then go to
+    /// nobody instead of the handle.
     private var titleRow: some View {
         HStack {
-            Image(systemName: "line.3.horizontal")
-                .foregroundStyle(.tertiary)
-                .allowsHitTesting(false)
             Text("Screensaver Settings")
                 .font(.title3.weight(.semibold))
                 .allowsHitTesting(false)
