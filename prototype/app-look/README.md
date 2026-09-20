@@ -79,3 +79,12 @@ Set as Screensaver, then Tune — the way Accept is the one on the panel. D3's
 material is faked as `prototype/panel-look` faked it (a blur of what is under
 the sheet, then a tint); in the app it would be `.regularMaterial` over a
 live `PreviewView`, which is the tuning surface in a window.
+
+## Verdict (2026-09-20)
+
+**D4, the native grouped form, without the status caption at the foot.**
+Three sections — Extension, Screensaver (with *Open Screen Saver Settings*
+in it), Look — no Version or Path rows, no "Ready" line. Rendered as
+`D4-decided-grouped` in `shots/d-dark` and `shots/d-light`. Resolution on
+[#32](https://github.com/tamirelazar/tSlime-Screensaver/issues/32); the
+build is [#34](https://github.com/tamirelazar/tSlime-Screensaver/issues/34).
