@@ -170,13 +170,18 @@ final class TerminalManager {
             let w = Int(term.frame.width), h = Int(term.frame.height)
             logger.notice("diag launchProcess grid=\(t.cols, privacy: .public)x\(t.rows, privacy: .public) frame=\(w, privacy: .public)x\(h, privacy: .public)")
         }
+        // The frame rate tslime is asked for. Its default is 30 either way; it
+        // is spelled out because #12 measures the saver at more than one rate,
+        // and a rate that is never stated is a rate nobody can vary.
+        let fps = "30"
         if let path = bundledTslimePath() {
             // Run the embedded binary directly
-            terminalView?.startProcess(executable: path, args: ["--window-frame", "glow"])
+            terminalView?.startProcess(executable: path, args: ["--window-frame", "glow", "--fps", fps])
         } else {
             // Fallback to PATH if developer hasn’t embedded yet
-            terminalView?.startProcess(executable: "/usr/bin/env", args: ["tslime", "--window-frame glow"])
+            terminalView?.startProcess(executable: "/usr/bin/env", args: ["tslime", "--window-frame", "glow", "--fps", fps])
         }
+        logger.notice("diag launchProcess fps=\(fps, privacy: .public)")
         applyWindowSize()
         disableOutputPostProcessing()
     }
