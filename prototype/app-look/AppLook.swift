@@ -1159,19 +1159,16 @@ struct DecidedGroupedForm: View {
             if let plist = s.hijackedPlist {
                 Section { HijackBanner(plist: plist).listRowInsets(EdgeInsets()) }
             }
-            Section {
-                Text(s.statusMessage).font(.caption).foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .listRowBackground(Color.clear)
-            }
         }
         .formStyle(.grouped)
         .frame(width: 520, height: height)
     }
 }
 
+// Decided (2026-09-20): D4 without the status caption at the foot — the
+// dots already say what it said, and "Ready" said nothing.
 func decidedFormHeight(_ s: AppState) -> CGFloat {
-    var h: CGFloat = 470
+    var h: CGFloat = 418
     if s.installError != nil { h += 28 }
     if s.activationError != nil { h += 28 }
     if s.hijackedPlist != nil { h += 150 }
@@ -1244,7 +1241,7 @@ func sheetOverSaver(_ stub: Stub) -> AnyView {
 
 let round2: [Candidate] = [
     Candidate(key: "D4-decided-grouped", title: "D4  decided grouped form",
-              summary: "the native grouped form with the decided edits · the control for the range",
+              summary: "the native grouped form with the decided edits, no status caption · the verdict",
               windowTitle: "tSlime",
               make: { stub, sc in AnyView(DecidedGroupedForm(stub: stub, height: decidedFormHeight(sc.state))) }),
     Candidate(key: "D1-label-grid", title: "D1  label grid",
