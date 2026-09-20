@@ -317,10 +317,15 @@ extension SaverTuningSurface {
         hosting.layoutSubtreeIfNeeded()
 
         // What a press lands on, since that is the part of a drag that can be
-        // checked without a screen: the title row must reach the drag handle
-        // and the close glyph must not. Hosting views are flipped, so y is
-        // measured from the top.
+        // checked without a screen: everything that is not a control must
+        // reach the drag handle, and nothing may reach nobody — an empty hit
+        // is a press that falls through to the terminal view beneath.
+        // Hosting views are flipped, so y is measured from the top.
         for (what, point) in [("title row", NSPoint(x: 120, y: 30)),
+                              ("corner padding", NSPoint(x: 8, y: 8)),
+                              ("dot-size label", NSPoint(x: 50, y: 100)),
+                              ("cost sentence", NSPoint(x: 200, y: 195)),
+                              ("hide caption", NSPoint(x: 130, y: 252)),
                               ("close glyph", NSPoint(x: size.width - 32, y: 30)),
                               ("dot-size slider", NSPoint(x: 220, y: 100))] {
             let hit = hosting.hitTest(hosting.convert(point, to: hosting.superview))

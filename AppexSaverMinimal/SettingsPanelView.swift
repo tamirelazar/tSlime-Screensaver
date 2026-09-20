@@ -137,27 +137,28 @@ struct SettingsPanelView: View {
         }
         .padding(22)
         .frame(width: Self.width)
+        // The drag handle is the floor of the whole sheet, under every
+        // control: a press anywhere that is not a control — a label, a
+        // caption, the padding — drags. It also keeps the sheet from ever
+        // being empty to a hit test, which is what let a press on a label
+        // fall through to the terminal view beneath and select cells there.
+        .background(DragHandle(onDrag: onDrag))
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Self.cornerRadius))
     }
 
-    /// Handle glyph, title, close glyph. The handle and the title are the
-    /// drag region; the close glyph is a button of its own outside it, so a
-    /// press on it can never start a drag.
+    /// Handle glyph, title, close glyph. The glyph only says the sheet
+    /// moves; the whole sheet is the drag region, which is why every text
+    /// on it is `allowsHitTesting(false)` — a label takes the hit otherwise,
+    /// and a press on it would then go to nobody instead of the handle.
     private var titleRow: some View {
         HStack {
-            ZStack {
-                DragHandle(onDrag: onDrag)
-                HStack {
-                    Image(systemName: "line.3.horizontal")
-                        .foregroundStyle(.tertiary)
-                    Text("Screensaver Settings")
-                        .font(.title3.weight(.semibold))
-                    Spacer()
-                }
-                // Neither the glyph nor the title takes a click, so the handle
-                // beneath them gets every press in the row.
+            Image(systemName: "line.3.horizontal")
+                .foregroundStyle(.tertiary)
                 .allowsHitTesting(false)
-            }
+            Text("Screensaver Settings")
+                .font(.title3.weight(.semibold))
+                .allowsHitTesting(false)
+            Spacer()
             Button(action: onExit) {
                 Image(systemName: "xmark.circle.fill")
                     .font(.title2)
@@ -173,6 +174,7 @@ struct SettingsPanelView: View {
             GridRow {
                 Text("Braille")
                     .gridColumnAlignment(.trailing)
+                    .allowsHitTesting(false)
                 Picker("Braille", selection: $model.source) {
                     ForEach(BrailleSource.allCases, id: \.self) { source in
                         Text(Self.name(for: source)).tag(source)
@@ -185,10 +187,12 @@ struct SettingsPanelView: View {
             // renderer's own dot drawing, which a face turns off entirely.
             GridRow {
                 Text("Dot size")
+                    .allowsHitTesting(false)
                 fraction($model.dotSizeFraction, in: BrailleSettings.dotSizeFractionRange)
             }
             GridRow {
                 Text("Corner")
+                    .allowsHitTesting(false)
                 fraction($model.cornerFraction, in: BrailleSettings.cornerFractionRange)
             }
         }
@@ -202,6 +206,7 @@ struct SettingsPanelView: View {
             Text(String(format: "%.2f", value.wrappedValue))
                 .font(.caption.monospacedDigit())
                 .frame(width: 36, alignment: .trailing)
+                .allowsHitTesting(false)
         }
     }
 
@@ -233,6 +238,7 @@ struct SettingsPanelView: View {
             Text("until the next input")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
+                .allowsHitTesting(false)
             Spacer()
             Button("Discard") { model.discard() }
                 .disabled(!model.isDirty)
@@ -254,10 +260,11 @@ struct SettingsPanelView: View {
 
 // MARK: - Dragging
 
-/// The region of the title row a drag starts in. An AppKit view rather than
-/// a SwiftUI gesture, because the thing being moved is the hosting view the
-/// gesture would be measured in: its coordinate space moves with every
-/// step of the drag, where the window's does not.
+/// The view a drag starts in: the floor of the sheet, under every control.
+/// An AppKit view rather than a SwiftUI gesture, because the thing being
+/// moved is the hosting view the gesture would be measured in: its
+/// coordinate space moves with every step of the drag, where the window's
+/// does not.
 private struct DragHandle: NSViewRepresentable {
     var onDrag: (CGPoint) -> Void
 
@@ -276,8 +283,10 @@ private final class DragHandleView: NSView {
     var onDrag: ((CGPoint) -> Void)?
     private var last: NSPoint = .zero
 
+    /// The terminal view beneath the sheet claims an I-beam over its whole
+    /// bounds; the sheet claims the arrow back over its own.
     override func resetCursorRects() {
-        addCursorRect(bounds, cursor: .openHand)
+        addCursorRect(bounds, cursor: .arrow)
     }
 
     override func mouseDown(with event: NSEvent) {
