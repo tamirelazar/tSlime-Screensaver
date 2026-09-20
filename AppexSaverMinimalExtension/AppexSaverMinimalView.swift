@@ -45,6 +45,8 @@ final class AppexSaverMinimalView: ScreenSaverView {
     }
 
     deinit {
+        LifecycleProbe.event("view.deinit")
+        LifecycleProbe.stopPolling()
         terminal.stop()
         logger.info("deinit")
     }
@@ -70,14 +72,43 @@ final class AppexSaverMinimalView: ScreenSaverView {
 
     override func startAnimation() {
         logger.info("startAnimation()")
+        LifecycleProbe.event("view.startAnimation", LifecycleProbe.census(self))
         super.startAnimation()
         terminal.start()
     }
 
     override func stopAnimation() {
         logger.info("stopAnimation()")
+        LifecycleProbe.event("view.stopAnimation", LifecycleProbe.census(self))
         terminal.stop()
         super.stopAnimation()
+    }
+
+    // MARK: - Lifecycle probe (issue #9)
+    //
+    // The two callbacks the ticket asks about by name. AppKit calls them when
+    // the view (or an ancestor) has its `isHidden` toggled -- which is not the
+    // same thing as the saver being off screen, and may well never fire in a
+    // remote-hosted view. Observed, not relied upon.
+
+    override func viewDidHide() {
+        super.viewDidHide()
+        LifecycleProbe.event("view.viewDidHide", LifecycleProbe.census(self))
+    }
+
+    override func viewDidUnhide() {
+        super.viewDidUnhide()
+        LifecycleProbe.event("view.viewDidUnhide", LifecycleProbe.census(self))
+    }
+
+    override func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+        LifecycleProbe.event("view.viewDidMoveToSuperview", "hasSuperview=\(self.superview != nil) \(LifecycleProbe.census(self))")
+    }
+
+    override func viewWillMove(toWindow newWindow: NSWindow?) {
+        super.viewWillMove(toWindow: newWindow)
+        LifecycleProbe.event("view.viewWillMoveToWindow", "newWindow=\(newWindow?.windowNumber ?? -1) \(LifecycleProbe.census(self))")
     }
 
     // MARK: - View Lifecycle
@@ -85,6 +116,12 @@ final class AppexSaverMinimalView: ScreenSaverView {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         logger.info("viewDidMoveToWindow() hasWindow=\(self.window != nil)")
+        LifecycleProbe.event("view.viewDidMoveToWindow", LifecycleProbe.census(self))
+        if self.window != nil {
+            LifecycleProbe.startPolling(self, tag: isPreview ? "preview" : "saver")
+        } else {
+            LifecycleProbe.stopPolling()
+        }
 
         if self.window != nil {
             terminal.attach(to: self)

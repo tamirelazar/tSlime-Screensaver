@@ -132,7 +132,9 @@ class YourScreenSaverView: ScreenSaverView {
 
 ### B. Traditional `ScreenSaverView` overrides
 
-Override `startAnimation()`, `stopAnimation()`, `animateOneFrame()`, and `draw(_:)`. These **do** get called by the framework when `SSENeedsAnimationTimer = true`; they're the same calls a `.saver` plug-in would receive.
+Override `startAnimation()`, `stopAnimation()`, `animateOneFrame()`, and `draw(_:)`. These are the same calls a `.saver` plug-in would receive.
+
+> **Measured correction (issue #9, macOS 26.5):** in an **appex**, `startAnimation()` and `stopAnimation()` are **not** delivered to the `ScreenSaverView`, with `SSENeedsAnimationTimer` either `true` or `false` — an A/B over five instrumented runs saw zero view-level calls in both settings. What the framework does deliver is `-[ScreenSaverViewController startAnimation]`, and its default implementation does not forward to the view. Do not gate work on the view's overrides; see §5A or start from `viewDidMoveToWindow`.
 
 ```swift
 class YourScreenSaverView: ScreenSaverView {

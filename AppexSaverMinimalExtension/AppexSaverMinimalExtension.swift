@@ -23,9 +23,22 @@ class AppexSaverMinimalExtension: ScreenSaverExtension {
     @objc override init() {
         logger.info("AppexSaverMinimalExtension.init() PID=\(ProcessInfo.processInfo.processIdentifier, privacy: .public)")
         super.init()
+        LifecycleProbe.announceProcess()
+        LifecycleProbe.observeNotifications()
+        LifecycleProbe.event("ext.init")
+    }
+
+    /// The extension point's only entry point. Per the note in
+    /// ScreenSaverPrivate.h, WallpaperAgent sends start/stop here as extension
+    /// items rather than as -startAnimation on the view -- issue #9 is partly
+    /// the question of what those items actually contain.
+    override func beginRequest(with context: NSExtensionContext) {
+        LifecycleProbe.describeRequest(context)
+        super.beginRequest(with: context)
     }
 
     deinit {
         logger.info("AppexSaverMinimalExtension.deinit")
+        LifecycleProbe.event("ext.deinit")
     }
 }
