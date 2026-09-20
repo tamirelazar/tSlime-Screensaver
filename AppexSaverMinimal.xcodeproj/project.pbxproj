@@ -12,6 +12,7 @@
 		1A000003000000000000000A /* AppexSaverMinimalExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000003000000000000000B /* AppexSaverMinimalExtension.swift */; };
 		1A000004000000000000000A /* AppexSaverMinimalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000004000000000000000B /* AppexSaverMinimalViewController.swift */; };
 		1A000099000000000000000A /* LifecycleProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000099000000000000000B /* LifecycleProbe.swift */; };
+		1A00009A000000000000000A /* HostHandshake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A00009A000000000000000B /* HostHandshake.swift */; };
 		1A000005000000000000000A /* AppexSaverMinimalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000005000000000000000B /* AppexSaverMinimalView.swift */; };
 		1A000006000000000000000A /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A000006000000000000000B /* ScreenSaver.framework */; };
 		1A000007000000000000000A /* AppexSaverMinimalExtension.appex in Embed PlugIns */ = {isa = PBXBuildFile; fileRef = 1A000007000000000000000B /* AppexSaverMinimalExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -85,6 +86,7 @@
 		1A000003000000000000000B /* AppexSaverMinimalExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppexSaverMinimalExtension.swift; sourceTree = "<group>"; };
 		1A000004000000000000000B /* AppexSaverMinimalViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppexSaverMinimalViewController.swift; sourceTree = "<group>"; };
 		1A000099000000000000000B /* LifecycleProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifecycleProbe.swift; sourceTree = "<group>"; };
+		1A00009A000000000000000B /* HostHandshake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostHandshake.swift; sourceTree = "<group>"; };
 		1A000005000000000000000B /* AppexSaverMinimalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppexSaverMinimalView.swift; sourceTree = "<group>"; };
 		1A000006000000000000000B /* ScreenSaver.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScreenSaver.framework; path = System/Library/Frameworks/ScreenSaver.framework; sourceTree = SDKROOT; };
 		1A000007000000000000000B /* AppexSaverMinimalExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AppexSaverMinimalExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -181,6 +183,7 @@
 				1A000004000000000000000B /* AppexSaverMinimalViewController.swift */,
 				1A000005000000000000000B /* AppexSaverMinimalView.swift */,
 				1A000099000000000000000B /* LifecycleProbe.swift */,
+				1A00009A000000000000000B /* HostHandshake.swift */,
 				1A000030000000000000000B /* AppexSaverMinimalConfigurationViewController.swift */,
 				1A000031000000000000000B /* Assets.xcassets */,
 				1A00000E000000000000000B /* AppexSaverMinimalExtension-Bridging-Header.h */,
@@ -397,6 +400,7 @@
 				1A000004000000000000000A /* AppexSaverMinimalViewController.swift in Sources */,
 				1A000005000000000000000A /* AppexSaverMinimalView.swift in Sources */,
 				1A000099000000000000000A /* LifecycleProbe.swift in Sources */,
+				1A00009A000000000000000A /* HostHandshake.swift in Sources */,
 				1A000030000000000000000A /* AppexSaverMinimalConfigurationViewController.swift in Sources */,
 				1A000067000000000000000A /* Logger.swift in Sources */,
 				1A000061000000000000000A /* RainbowAnimator.swift in Sources */,

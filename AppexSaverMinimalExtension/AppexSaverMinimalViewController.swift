@@ -44,7 +44,14 @@ class AppexSaverMinimalViewController: ScreenSaverViewController {
         LifecycleProbe.event("vc.loadView")
 
         let frame = NSScreen.main?.frame ?? NSRect(x: 0, y: 0, width: 1920, height: 1080)
-        let isPreview = frame.width < 400
+
+        // Issue #22. The sample-code idiom here is `frame.width < 400`, but
+        // `frame` is the *screen's* frame rather than a host-supplied one, so
+        // that test could never be true: the preview case was unreachable and
+        // the answer was always `false`. The host states the real value on the
+        // handshake four milliseconds earlier -- see HostHandshake -- and
+        // `false` is kept only as the fallback the old test amounted to.
+        let isPreview = HostHandshake.isPreview(fallback: false)
 
         let view = AppexSaverMinimalView(frame: frame, isPreview: isPreview)
         saverView = view

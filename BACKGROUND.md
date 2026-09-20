@@ -196,12 +196,25 @@ The view controller overrides `loadView()` to instantiate and assign the screens
 class YourViewController: ScreenSaverViewController {
     override func loadView() {
         let frame = NSScreen.main?.frame ?? NSRect(x: 0, y: 0, width: 1920, height: 1080)
-        let isPreview = frame.width < 400
+        let isPreview = frame.width < 400   // see the warning below: this never fires
         self.view = YourScreenSaverView(frame: frame, isPreview: isPreview)
             ?? NSView(frame: frame)
     }
 }
 ```
+
+> **`frame.width < 400` cannot detect a preview** (measured, issue #22). `frame`
+> here is `NSScreen.main`'s frame, not a size the host supplied, so the test is
+> false on any real display and the preview branch is unreachable. The host
+> *declares* the value instead, on the `handshake` extension item delivered to
+> `beginRequestWithExtensionContext:` (`userInfo["isPreview"]`, an `NSNumber`),
+> about 3 ms before `loadView` runs. `ScreenSaverViewController` exposes nothing
+> about previews — a runtime dump of ScreenSaver.framework puts every
+> `isPreview` accessor (`ScreenSaverExtensionManager`, `ScreenSaverModules`,
+> `ScreenSaverExtensionModule`) on the **host** side of the boundary — so the
+> handshake is the only channel, and the value must be parked process-wide
+> because the principal class is built and destroyed per request. This repo does
+> that in `AppexSaverMinimalExtension/HostHandshake.swift`.
 
 ---
 

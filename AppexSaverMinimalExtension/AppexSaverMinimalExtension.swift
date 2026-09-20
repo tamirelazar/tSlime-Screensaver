@@ -34,6 +34,9 @@ class AppexSaverMinimalExtension: ScreenSaverExtension {
     /// the question of what those items actually contain.
     override func beginRequest(with context: NSExtensionContext) {
         LifecycleProbe.describeRequest(context)
+        // The handshake carries isPreview, and this object does not outlive the
+        // request -- HostHandshake parks it for loadView (issue #22).
+        HostHandshake.record(context)
         super.beginRequest(with: context)
     }
 

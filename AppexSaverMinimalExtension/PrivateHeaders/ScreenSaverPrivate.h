@@ -58,7 +58,12 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// Note: -loadViewForFrame:isPreview: and the representedView / animating
 /// properties existed on older macOS but are gone from the current framework
-/// (verified via runtime dump); only the standard -loadView is called.
+/// (verified via runtime dump); only the standard -loadView is called. The
+/// preview flag survives that removal only on the `handshake` item's userInfo
+/// -- this controller declares nothing about previews, and every isPreview
+/// accessor left in the framework (ScreenSaverExtensionManager,
+/// ScreenSaverModules, ScreenSaverExtensionModule) is host-side. See
+/// HostHandshake.swift, issue #22.
 @interface ScreenSaverViewController : NSViewController
 
 - (void)startAnimation;
