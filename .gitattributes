@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# The bundled faces and the licences that must travel with them are upstream
+# artifacts: keep them byte-identical rather than LF-normalised.
+Fonts/* -text

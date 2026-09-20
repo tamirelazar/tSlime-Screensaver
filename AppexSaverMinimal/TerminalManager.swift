@@ -55,7 +55,9 @@ final class TerminalManager {
             let term = LocalProcessTerminalView(frame: view.bounds)
             term.autoresizingMask = [.width, .height]
             term.frame = view.bounds
-            term.font = NSFont.monospacedSystemFont(ofSize: 16, weight: .regular)
+            // The `.procedural` font. `applyBrailleSettings` below replaces it
+            // if the stored source names a face, before anything is drawn.
+            term.font = NSFont.monospacedSystemFont(ofSize: Self.fontSize, weight: .regular)
             view.addSubview(term)
             terminalView = term
             // tslime redraws large portions of the screen every frame, so
@@ -153,16 +155,50 @@ final class TerminalManager {
     /// "leave it at the default": what the saver looks like is decided here,
     /// not by whichever fork revision happens to be pinned.
     ///
-    /// The two font sources are not wired yet — the faces are not bundled,
-    /// which is #16. Until then they read as "not procedural", which turns
-    /// the drawn dot grid off and lets the current font shape the cell.
+    /// The source picks both halves of the look together. `.procedural` draws
+    /// the dot grid in the renderer and leaves the view on the system
+    /// monospaced face; either font source turns the drawn grid off and hands
+    /// the braille cell to a face that actually has one. They are set in that
+    /// order on purpose — see `applyFont`.
     private func applyBrailleSettings(_ braille: BrailleSettings) {
         guard let term = terminalView else { return }
         term.customBrailleGlyphs = braille.source == .procedural
         term.brailleDotSizeFraction = braille.dotSizeFraction
         term.brailleCornerFraction = braille.cornerFraction
+        applyFont(for: braille.source, to: term)
         logger.notice("diag braille applied source=\(braille.source.rawValue, privacy: .public) dot=\(String(format: "%.3f", braille.dotSizeFraction), privacy: .public) corner=\(String(format: "%.3f", braille.cornerFraction), privacy: .public)")
     }
+
+    /// Sets the view's font for `source`, and tells tslime about the grid it
+    /// just changed.
+    ///
+    /// The three sources do not share a cell: at 16 pt on a 2x display both
+    /// bundled faces give a 9.50 pt cell against the system face's 10.00, and
+    /// JetBrainsMono NFM a 21.50 pt line against 19.00. So a font change is a
+    /// grid change. SwiftTerm's `font` setter already recomputes the cell,
+    /// resizes the emulator and pushes the new winsize down the pty, which
+    /// tslime handles as a SIGWINCH and re-lays out live — but only while the
+    /// child is running, so a font set before `start()` needs no push and a
+    /// font set after gets one for free.
+    ///
+    /// Guarded on the name because the setter is unconditional: assigning the
+    /// same font still rebuilds the font set and drops every glyph cache. A
+    /// settings change that moved only the dot size must not pay that.
+    private func applyFont(for source: BrailleSource, to term: LocalProcessTerminalView) {
+        let font = BrailleFonts.font(for: source, size: Self.fontSize)
+        guard term.font.fontName != font.fontName else { return }
+
+        let before = term.getTerminal()
+        let (oldCols, oldRows) = (before.cols, before.rows)
+        term.font = font
+        let after = term.getTerminal()
+        logger.notice("diag font -> \(font.fontName, privacy: .public) grid=\(oldCols, privacy: .public)x\(oldRows, privacy: .public) -> \(after.cols, privacy: .public)x\(after.rows, privacy: .public) running=\(term.process?.running ?? false, privacy: .public)")
+    }
+
+    /// The one font size this saver uses. Fixed by the destination, not a
+    /// setting: the grid it produces is what every measurement in this map
+    /// was taken against.
+    private static let fontSize: CGFloat = 16
 
     private func launchProcess() {
         if let term = terminalView {
