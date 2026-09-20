@@ -1140,8 +1140,10 @@ struct DecidedGroupedForm: View {
                 HStack {
                     Spacer()
                     Button("Refresh") { stub.refresh() }
+                    // Plain until the extension is registered (#34): a dim
+                    // prominent button under a step not yet taken read wrong.
                     Button("Set as Screensaver") { stub.enable() }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(s.isInstalled)
                         .disabled(!s.isInstalled || s.isActive || stub.busy)
                 }
                 LabeledContent("System Settings") {
