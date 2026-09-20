@@ -33,9 +33,20 @@ final class TerminalManager {
     /// The saver settings, read once here and then watched. Constructing the
     /// manager is what "read at loadView" means for the extension: the view
     /// owns the manager, and the framework builds the view in `loadView`.
-    private let settings = SaverSettingsStore()
+    ///
+    /// The host app's tuning surface passes one store shared by every screen,
+    /// so a staged value reaches all of them at once. Nothing here can tell a
+    /// staged value from a saved one, which is the point — what the user
+    /// tunes is drawn by this code path, not a parallel one.
+    private let settings: SaverSettingsStore
     #else
     private var placeholderLabel: NSTextField?
+    #endif
+
+    #if canImport(SwiftTerm)
+    init(settings: SaverSettingsStore = SaverSettingsStore()) {
+        self.settings = settings
+    }
     #endif
 
     private func bundledTslimePath() -> String? {
@@ -75,6 +86,11 @@ final class TerminalManager {
             applyBrailleSettings(settings.braille)
             settings.onBrailleChange = { [weak self] updated in
                 self?.applyBrailleSettings(updated)
+            }
+            // Separate callback because it is applied separately: the braille
+            // values are an assignment, the frame rate is a relaunch.
+            settings.onFrameRateChange = { [weak self] updated in
+                self?.relaunchProcess(at: updated)
             }
             // Re-reads as it starts, so a change made while this manager had
             // no view is picked up rather than waiting for the next one.
@@ -122,6 +138,7 @@ final class TerminalManager {
         #if canImport(SwiftTerm)
         settings.stopObserving()
         settings.onBrailleChange = nil
+        settings.onFrameRateChange = nil
         if let term = terminalView {
             term.terminate()
             term.removeFromSuperview()
@@ -206,13 +223,11 @@ final class TerminalManager {
             let w = Int(term.frame.width), h = Int(term.frame.height)
             logger.notice("diag launchProcess grid=\(t.cols, privacy: .public)x\(t.rows, privacy: .public) frame=\(w, privacy: .public)x\(h, privacy: .public)")
         }
-        // The frame rate tslime is asked for. Sixty, decided in #24: the fork's
-        // redraw is vsync-paced now, so the saver presents every one of them.
-        // It costs 67% of a core against the 60% the destination first asked
-        // for -- knowingly, and #24 records what that spends. Never set this
-        // above what the saver can present: the parser is paid for every frame,
-        // including the ones a cap would drop.
-        let fps = "60"
+        // The frame rate tslime is asked for -- a setting since #21, still
+        // defaulting to the sixty decided in #24. It is a launch argument, so
+        // this is the only place it can be applied, and changing it means
+        // relaunching the child: see `relaunchProcess(at:)`.
+        let fps = settings.frameRate.argument
         if let path = bundledTslimePath() {
             // Run the embedded binary directly
             terminalView?.startProcess(executable: path, args: ["--window-frame", "glow", "--fps", fps])
@@ -223,6 +238,25 @@ final class TerminalManager {
         logger.notice("diag launchProcess fps=\(fps, privacy: .public)")
         applyWindowSize()
         disableOutputPostProcessing()
+    }
+
+    /// Restarts tslime so it picks up a new `--fps`.
+    ///
+    /// The rate is a launch argument, so unlike every braille value it cannot
+    /// be assigned into a running view. `terminate()` clears `running`, closes
+    /// the pty and reaps the child; `startProcess` then forks a fresh one,
+    /// while the view, the Metal renderer and the glyph caches all survive --
+    /// only the child restarts.
+    ///
+    /// Nothing clears the terminal buffer, so the ~290 ms tslime takes to
+    /// start (#10) shows the **last frame frozen**, not black. That is the
+    /// whole cost of applying this live, and it is cheaper than a control that
+    /// visibly does nothing until the next time the screensaver starts.
+    private func relaunchProcess(at rate: FrameRate) {
+        guard isRunning, terminalView != nil else { return }
+        logger.notice("diag relaunching tslime at fps=\(rate.rawValue, privacy: .public)")
+        terminalView?.terminate()
+        launchProcess()
     }
 
     /// Turn off ONLCR on the pty.

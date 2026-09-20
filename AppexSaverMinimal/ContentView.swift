@@ -13,7 +13,6 @@ import SwiftUI
 private let logger = AppexLog.logger("HostApp")
 
 struct ContentView: View {
-    @Environment(\.openWindow) private var openWindow
     @StateObject private var pluginManager = PluginManager()
     @State private var statusMessage = "Ready"
     @State private var hijackedSettingsDomain: URL?
@@ -58,10 +57,11 @@ struct ContentView: View {
 
             // MARK: - Actions
             HStack(spacing: 12) {
-                Button("Open Preview") {
-                    ScreensaverPreviewController.shared.show()
+                Button("Saver Settings…") {
+                    SaverTuningSurface.shared.show()
                 }
                 .buttonStyle(.borderedProminent)
+                .help("Tune the saver over a live full-screen render")
 
                 Button("Open Screen Saver Settings") {
                     openScreenSaverSettings()
@@ -81,6 +81,16 @@ struct ContentView: View {
         .padding(40)
         .fixedSize()
         .onAppear(perform: checkSettingsDomain)
+        // How the Options sheet in System Settings reaches the tuning
+        // surface: the sheet is sandboxed and can only ask the system to open
+        // a URL, so the app registers a scheme and turns it into a show().
+        // Opening the app's main window instead would be a dead end with a
+        // step in it; always launching into the surface would be worse, since
+        // this window is also how the extension is installed and activated.
+        .onOpenURL { url in
+            guard url.scheme == SaverTuningSurface.urlScheme else { return }
+            SaverTuningSurface.shared.show()
+        }
     }
 
     /// The alarm for the one failure that is invisible everywhere else.

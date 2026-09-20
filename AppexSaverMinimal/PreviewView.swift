@@ -12,14 +12,28 @@ import AppKit
 
 final class PreviewView: NSView {
 
-    private let terminal = TerminalManager()
+    private let terminal: TerminalManager
+
+    /// - Parameter settings: the store this view's terminal draws from. The
+    ///   tuning surface passes one store shared by every screen, so a staged
+    ///   value reaches all of them at once; left out, the view reads the
+    ///   domain on its own like the screensaver does.
+    #if canImport(SwiftTerm)
+    init(frame frameRect: NSRect, settings: SaverSettingsStore) {
+        terminal = TerminalManager(settings: settings)
+        super.init(frame: frameRect)
+        wantsLayer = true
+    }
+    #endif
 
     override init(frame frameRect: NSRect) {
+        terminal = TerminalManager()
         super.init(frame: frameRect)
         wantsLayer = true
     }
 
     required init?(coder: NSCoder) {
+        terminal = TerminalManager()
         super.init(coder: coder)
         wantsLayer = true
     }

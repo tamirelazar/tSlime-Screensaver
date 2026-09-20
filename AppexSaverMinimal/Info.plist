@@ -24,6 +24,21 @@
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright 2025. All rights reserved.</string>
+	<!-- How the extension's Options sheet reaches the tuning surface. The
+	     sheet is sandboxed and can only ask the system to open a URL; this is
+	     the scheme it opens. SaverTuningSurface.urlScheme is the same string
+	     on the app side. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>net.aerialscreensaver.AppexSaverMinimal.settings</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>appexsaverminimal</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

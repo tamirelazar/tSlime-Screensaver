@@ -2,8 +2,8 @@
 //  SaverSettings.swift
 //  Shared between appex and host app
 //
-//  The saver settings: the values the saver reads to decide how it looks.
-//  Braille is their only group today.
+//  The saver settings: the values the saver reads to decide how it looks and
+//  what it costs. Two groups — the braille look, and the frame rate.
 //
 //  Where they live and why is ADR 0002. The short version, because the two
 //  halves of this file only make sense together:
@@ -14,7 +14,9 @@
 //  .read-only, and physically cannot write it — the kernel denies the
 //  attempt — so the direction is a property of the system, not a convention
 //  this file is asking anyone to keep. There is deliberately no write path
-//  in this file.
+//  in this file; the host app's is in SaverSettingsWriter.swift, which is a
+//  separate file for exactly that reason — the extension's copy of the world
+//  does not contain it.
 //
 //  This file must not be built into a sandboxed host app. cfprefsd routes a
 //  domain into a container the moment that container holds a plist for it,
@@ -29,7 +31,7 @@ import Foundation
 import CoreGraphics
 import SwiftTerm
 
-// MARK: - Values
+// MARK: - The braille group
 
 /// Which of three ways a braille cell is drawn. Not a font choice: one of
 /// its values is not a font.
@@ -117,15 +119,95 @@ struct BrailleSettings: Equatable {
     }
 }
 
+// MARK: - The frame-rate group
+
+/// The rate the saver asks tslime for, and therefore the rate it presents.
+///
+/// Two values, not a number. A rate above what the saver can present is
+/// strictly wasteful — the parser is paid for every frame including the ones
+/// that are dropped, which is why a 60 fps source behind the old 30 fps cap
+/// cost 41–44% of a core to show the same 30 frames a 30 fps source showed
+/// for 37.5% (#24). An open integer invites exactly that mistake.
+///
+/// This is not a look. It is a power control: 60 costs 67.1% of a core
+/// against 30's 37.5%, continuously, for as long as the saver is up.
+enum FrameRate: Int, CaseIterable {
+    case thirty = 30
+    case sixty = 60
+
+    /// Sixty, decided in #24 — the fork's redraw is vsync-paced now, so the
+    /// saver presents every frame it is given.
+    static let `default` = FrameRate.sixty
+
+    /// No dots, for the same reason the braille keys have none.
+    static let key = "frameRate"
+
+    /// Anything that is not one of the two values — missing, wrong-typed, or
+    /// a number nobody should have stored — reads as the default.
+    init(reading defaults: UserDefaults) {
+        guard let number = defaults.object(forKey: FrameRate.key) as? NSNumber,
+              let rate = FrameRate(rawValue: number.intValue) else {
+            self = FrameRate.default
+            return
+        }
+        self = rate
+    }
+
+    /// What tslime's `--fps` wants.
+    var argument: String { String(rawValue) }
+}
+
+// MARK: - Both groups
+
+/// Every saver setting, in its groups.
+///
+/// The groups are kept apart because they differ in *kind*, not just in
+/// content: the braille values are applied to a live view by assignment,
+/// while the frame rate is a launch argument and can only be applied by
+/// restarting tslime. `SaverSettingsStore` reports them through separate
+/// callbacks so that difference is structural rather than remembered — a
+/// single callback would put "did only the dot size move?" into the consumer
+/// as a hand-written diff, and getting that wrong means a slider drag
+/// restarts a process.
+struct SaverSettings: Equatable {
+    var braille: BrailleSettings
+    var frameRate: FrameRate
+
+    static let `default` = SaverSettings(braille: .default, frameRate: .default)
+
+    init(braille: BrailleSettings, frameRate: FrameRate) {
+        self.braille = braille
+        self.frameRate = frameRate
+    }
+
+    init(reading defaults: UserDefaults) {
+        self.braille = BrailleSettings(reading: defaults)
+        self.frameRate = FrameRate(reading: defaults)
+    }
+
+    /// Every key the store observes. A key that is not here is a setting that
+    /// silently never reaches a running instance.
+    static let observedKeys = BrailleSettings.Key.all + [FrameRate.key]
+}
+
 // MARK: - Reading the domain
 
-/// Reads the saver settings domain, and keeps reading it.
+/// Reads the saver settings domain, keeps reading it, and — in the host app
+/// only — holds staged values on top of it.
 ///
 /// A change has to reach the instance the user is actually looking at, and
-/// that instance is very often the resident one, which never calls
-/// `loadView` again. So a read at load is not enough on its own: the store
-/// also observes the domain across processes, which delivers a change in
-/// tens of milliseconds.
+/// that instance may never call `loadView` again. So a read at load is not
+/// enough on its own: the store also observes the domain across processes,
+/// which delivers a change in tens of milliseconds.
+///
+/// **Staging** is how the tuning surface shows an uncommitted value without
+/// writing it anywhere. Staged values sit on top of what the domain says and
+/// are reported through the very same callbacks a domain change would have
+/// fired, so a consumer cannot tell staged from saved — which is the whole
+/// point: what the user tunes is drawn by the same code path that draws what
+/// ships, not a parallel one that has to be kept in step. Staging is still
+/// not writing, so this stays inside the read-only half of ADR 0002; the
+/// extension simply never stages anything.
 final class SaverSettingsStore: NSObject {
 
     /// The host app's own bundle identifier, and therefore its defaults
@@ -143,47 +225,98 @@ final class SaverSettingsStore: NSObject {
         return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
 
+    /// The defaults object the settings domain is reached through, for
+    /// whichever process is asking. Shared with the writer so the two halves
+    /// can never disagree about which domain they mean.
+    ///
+    /// Addressing the domain by name from the host app itself is the one case
+    /// `UserDefaults` rejects, since it is already the standard domain there.
+    static func makeDefaults() -> UserDefaults {
+        if Bundle.main.bundleIdentifier == domain {
+            return .standard
+        }
+        if let suite = UserDefaults(suiteName: domain) {
+            return suite
+        }
+        // Only reachable if the domain name itself is bad. Falling back to
+        // the process's own domain would read nothing and report no error,
+        // so say so.
+        logger.error("settings domain \(domain, privacy: .public) unavailable; using own domain instead")
+        return .standard
+    }
+
     private let defaults: UserDefaults
     private var observing = false
 
-    /// The last values read. Reading this never touches the defaults system.
-    private(set) var braille: BrailleSettings
+    /// What the domain says. Reading this never touches the defaults system.
+    private(set) var saved: SaverSettings
 
-    /// Called on the main thread whenever the domain changes the values.
-    /// Not called for a write that leaves them equal.
+    /// What the tuning surface is showing but has not committed, if anything.
+    /// Collapsed back to nil the moment it agrees with `saved`, so `isDirty`
+    /// cannot drift.
+    private(set) var staged: SaverSettings?
+
+    /// What a consumer should draw: staged if anything is staged, saved
+    /// otherwise.
+    var effective: SaverSettings { staged ?? saved }
+
+    var braille: BrailleSettings { effective.braille }
+    var frameRate: FrameRate { effective.frameRate }
+
+    /// Whether there is anything for Accept to write or Discard to throw away.
+    var isDirty: Bool { staged != nil }
+
+    /// Called on the main thread whenever the effective values of that group
+    /// change, from either source. Not called for a change that leaves the
+    /// group equal.
     var onBrailleChange: ((BrailleSettings) -> Void)?
+    var onFrameRateChange: ((FrameRate) -> Void)?
 
     override init() {
-        // Addressing the domain by name from the host app itself is the one
-        // case UserDefaults rejects, since it is already the standard domain
-        // there.
-        if Bundle.main.bundleIdentifier == SaverSettingsStore.domain {
-            defaults = .standard
-        } else if let suite = UserDefaults(suiteName: SaverSettingsStore.domain) {
-            defaults = suite
-        } else {
-            // Only reachable if the domain name itself is bad. Falling back
-            // to the process's own domain would read nothing and report no
-            // error, so say so.
-            defaults = .standard
-            SaverSettingsStore.logger.error(
-                "settings domain \(SaverSettingsStore.domain, privacy: .public) unavailable; reading own domain instead")
-        }
-        braille = BrailleSettings(reading: defaults)
+        defaults = SaverSettingsStore.makeDefaults()
+        saved = SaverSettings(reading: defaults)
         super.init()
         SaverSettingsStore.logger.notice(
-            "diag settings read source=\(self.braille.source.rawValue, privacy: .public) dot=\(String(format: "%.3f", self.braille.dotSizeFraction), privacy: .public) corner=\(String(format: "%.3f", self.braille.cornerFraction), privacy: .public) domain=\(SaverSettingsStore.domain, privacy: .public)")
+            "diag settings read source=\(self.saved.braille.source.rawValue, privacy: .public) dot=\(String(format: "%.3f", self.saved.braille.dotSizeFraction), privacy: .public) corner=\(String(format: "%.3f", self.saved.braille.cornerFraction), privacy: .public) fps=\(self.saved.frameRate.rawValue, privacy: .public) domain=\(SaverSettingsStore.domain, privacy: .public)")
     }
 
     deinit {
         stopObserving()
     }
 
+    // MARK: Staging
+
+    /// Shows `settings` without writing them anywhere.
+    func stage(_ settings: SaverSettings) {
+        let previous = effective
+        staged = (settings == saved) ? nil : settings
+        publish(changedFrom: previous)
+    }
+
+    /// Throws staged values away and goes back to what the domain says.
+    func discardStaged() {
+        guard staged != nil else { return }
+        let previous = effective
+        staged = nil
+        SaverSettingsStore.logger.notice("diag settings staged values discarded")
+        publish(changedFrom: previous)
+    }
+
+    /// Fires the per-group callbacks for whichever groups the effective
+    /// values just moved in.
+    private func publish(changedFrom previous: SaverSettings) {
+        let now = effective
+        if now.braille != previous.braille { onBrailleChange?(now.braille) }
+        if now.frameRate != previous.frameRate { onFrameRateChange?(now.frameRate) }
+    }
+
+    // MARK: Observing
+
     /// Starts delivering changes. Safe to call more than once.
     func startObserving() {
         guard !observing else { return }
         observing = true
-        for key in BrailleSettings.Key.all {
+        for key in SaverSettings.observedKeys {
             defaults.addObserver(self, forKeyPath: key, options: [], context: nil)
         }
     }
@@ -191,7 +324,7 @@ final class SaverSettingsStore: NSObject {
     func stopObserving() {
         guard observing else { return }
         observing = false
-        for key in BrailleSettings.Key.all {
+        for key in SaverSettings.observedKeys {
             defaults.removeObserver(self, forKeyPath: key)
         }
     }
@@ -200,7 +333,7 @@ final class SaverSettingsStore: NSObject {
                                of object: Any?,
                                change: [NSKeyValueChangeKey: Any]?,
                                context: UnsafeMutableRawPointer?) {
-        guard let keyPath, BrailleSettings.Key.all.contains(keyPath) else {
+        guard let keyPath, SaverSettings.observedKeys.contains(keyPath) else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
             return
         }
@@ -214,15 +347,20 @@ final class SaverSettingsStore: NSObject {
     }
 
     private func reread() {
-        let updated = BrailleSettings(reading: defaults)
-        guard updated != braille else { return }
-        braille = updated
+        let updated = SaverSettings(reading: defaults)
+        guard updated != saved else { return }
+        let previous = effective
+        saved = updated
+        // The domain catching up with what was staged is how an Accept ends:
+        // the staged values are dropped exactly when they stop being an
+        // overlay, so the effective values never move and nothing is redrawn.
+        if staged == saved { staged = nil }
         SaverSettingsStore.logger.notice(
-            "diag settings changed source=\(updated.source.rawValue, privacy: .public) dot=\(String(format: "%.3f", updated.dotSizeFraction), privacy: .public) corner=\(String(format: "%.3f", updated.cornerFraction), privacy: .public)")
-        onBrailleChange?(updated)
+            "diag settings changed source=\(updated.braille.source.rawValue, privacy: .public) dot=\(String(format: "%.3f", updated.braille.dotSizeFraction), privacy: .public) corner=\(String(format: "%.3f", updated.braille.cornerFraction), privacy: .public) fps=\(updated.frameRate.rawValue, privacy: .public)")
+        publish(changedFrom: previous)
     }
 
-    private static let logger = AppexLog.logger("Settings")
+    fileprivate static let logger = AppexLog.logger("Settings")
 }
 
 #endif

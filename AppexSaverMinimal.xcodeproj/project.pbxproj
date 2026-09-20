@@ -34,12 +34,14 @@
 		A1869E43305DC453009232D9 /* tslime in Resources */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* tslime */; };
 		A1869E44305DC453009232D9 /* tslime in Resources */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* tslime */; };
 		A1869E46305DC4D6009232D9 /* tslime in CopyFiles */ = {isa = PBXBuildFile; fileRef = A1869E42305DC453009232D9 /* tslime */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		A1869E48305DD34B009232D9 /* ScreensaverPreviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E47305DD34B009232D9 /* ScreensaverPreviewController.swift */; };
+		A1869E48305DD34B009232D9 /* SaverTuningSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1869E47305DD34B009232D9 /* SaverTuningSurface.swift */; };
 		1A000084000000000000000A /* JuliaMono-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1A000081000000000000000B /* JuliaMono-Bold.ttf */; };
 		1A000086000000000000000A /* JetBrainsMonoNerdFontMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1A000082000000000000000B /* JetBrainsMonoNerdFontMono-Regular.ttf */; };
 		1A000088000000000000000A /* JuliaMono-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1A000083000000000000000B /* JuliaMono-LICENSE.txt */; };
 		1A00008B000000000000000A /* JetBrainsMono-OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1A00008A000000000000000B /* JetBrainsMono-OFL.txt */; };
 		1A00008C000000000000000A /* BrailleFonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A00008E000000000000000B /* BrailleFonts.swift */; };
+		1A0000A0000000000000000A /* SaverSettingsWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000A0000000000000000B /* SaverSettingsWriter.swift */; };
+		1A0000A1000000000000000A /* SettingsPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000A1000000000000000B /* SettingsPanelView.swift */; };
 		1A00008D000000000000000A /* BrailleFonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A00008E000000000000000B /* BrailleFonts.swift */; };
 /* End PBXBuildFile section */
 
@@ -103,9 +105,11 @@
 		1A000064000000000000000B /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		A1869E38305DB82B009232D9 /* TerminalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalManager.swift; sourceTree = "<group>"; };
 		1A00008E000000000000000B /* BrailleFonts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrailleFonts.swift; sourceTree = "<group>"; };
+		1A0000A0000000000000000B /* SaverSettingsWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaverSettingsWriter.swift; sourceTree = "<group>"; };
+		1A0000A1000000000000000B /* SettingsPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPanelView.swift; sourceTree = "<group>"; };
 		A1869E50305DC10A009232D9 /* SaverSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaverSettings.swift; sourceTree = "<group>"; };
 		A1869E42305DC453009232D9 /* tslime */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = tslime; sourceTree = "<group>"; };
-		A1869E47305DD34B009232D9 /* ScreensaverPreviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreensaverPreviewController.swift; sourceTree = "<group>"; };
+		A1869E47305DD34B009232D9 /* SaverTuningSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaverTuningSurface.swift; sourceTree = "<group>"; };
 		1A000081000000000000000B /* JuliaMono-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JuliaMono-Bold.ttf"; sourceTree = "<group>"; };
 		1A000082000000000000000B /* JetBrainsMonoNerdFontMono-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFontMono-Regular.ttf"; sourceTree = "<group>"; };
 		1A000083000000000000000B /* JuliaMono-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "JuliaMono-LICENSE.txt"; sourceTree = "<group>"; };
@@ -162,7 +166,9 @@
 				A1869E50305DC10A009232D9 /* SaverSettings.swift */,
 				1A00008E000000000000000B /* BrailleFonts.swift */,
 				A1869E42305DC453009232D9 /* tslime */,
-				A1869E47305DD34B009232D9 /* ScreensaverPreviewController.swift */,
+				A1869E47305DD34B009232D9 /* SaverTuningSurface.swift */,
+				1A0000A0000000000000000B /* SaverSettingsWriter.swift */,
+				1A0000A1000000000000000B /* SettingsPanelView.swift */,
 			);
 			path = AppexSaverMinimal;
 			sourceTree = "<group>";
@@ -365,7 +371,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A000001000000000000000A /* AppexSaverMinimalApp.swift in Sources */,
-				A1869E48305DD34B009232D9 /* ScreensaverPreviewController.swift in Sources */,
+				A1869E48305DD34B009232D9 /* SaverTuningSurface.swift in Sources */,
 				1A000002000000000000000A /* ContentView.swift in Sources */,
 				1A000032000000000000000A /* PluginManager.swift in Sources */,
 				1A000066000000000000000A /* Logger.swift in Sources */,
@@ -375,6 +381,8 @@
 				A1869E39305DB82B009232D9 /* TerminalManager.swift in Sources */,
 				A1869E51305DC10A009232D9 /* SaverSettings.swift in Sources */,
 				1A00008C000000000000000A /* BrailleFonts.swift in Sources */,
+				1A0000A0000000000000000A /* SaverSettingsWriter.swift in Sources */,
+				1A0000A1000000000000000A /* SettingsPanelView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
