@@ -925,31 +925,34 @@ func writePNG(_ img: CGImage, to url: URL) {
     try! data.write(to: url)
 }
 
-/// Tiles in a row at 1x, tops aligned, each with a label above it.
-func contactSheet(tiles: [(label: String, sub: String, image: CGImage)], scale: CGFloat) -> CGImage {
-    let gap: CGFloat = 20, labelH: CGFloat = 52
+/// Tiles in a grid at 1x, `cols` across, tops aligned, each with a label
+/// above it — the panel prototype's contact sheet, with more tiles.
+func contactSheet(tiles: [(label: String, sub: String, image: CGImage)], cols: Int, scale: CGFloat) -> CGImage {
+    let gap: CGFloat = 28, labelH: CGFloat = 56
     let widths = tiles.map { CGFloat($0.image.width) / scale }
     let heights = tiles.map { CGFloat($0.image.height) / scale }
-    let w = widths.reduce(0, +) + gap * CGFloat(tiles.count + 1)
-    let h = (heights.max() ?? 0) + labelH + gap * 2
+    let cellW = (widths.max() ?? 0), cellH = (heights.max() ?? 0) + labelH
+    let rows = (tiles.count + cols - 1) / cols
+    let w = cellW * CGFloat(cols) + gap * CGFloat(cols + 1)
+    let h = cellH * CGFloat(rows) + gap * CGFloat(rows + 1)
     let ctx = CGContext(data: nil, width: Int(w), height: Int(h), bitsPerComponent: 8, bytesPerRow: 0,
                         space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue)!
     ctx.setFillColor(NSColor(white: 0.12, alpha: 1).cgColor)
     ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
     ctx.interpolationQuality = .high
-    var x = gap
     for (i, tile) in tiles.enumerated() {
-        let top = h - gap - labelH
+        let col = CGFloat(i % cols), row = CGFloat(i / cols)
+        let x = gap + col * (cellW + gap)
+        let top = h - gap - row * (cellH + gap) - labelH
         ctx.draw(tile.image, in: CGRect(x: x, y: top - heights[i], width: widths[i], height: heights[i]))
         let title = NSAttributedString(string: tile.label, attributes: [
-            .font: NSFont.systemFont(ofSize: 20, weight: .semibold), .foregroundColor: NSColor.systemYellow])
-        ctx.textPosition = CGPoint(x: x + 8, y: top + 26)
+            .font: NSFont.systemFont(ofSize: 24, weight: .semibold), .foregroundColor: NSColor.systemYellow])
+        ctx.textPosition = CGPoint(x: x + 8, y: top + 28)
         CTLineDraw(CTLineCreateWithAttributedString(title), ctx)
         let sub = NSAttributedString(string: tile.sub, attributes: [
-            .font: NSFont.systemFont(ofSize: 13), .foregroundColor: NSColor(white: 0.8, alpha: 1)])
+            .font: NSFont.systemFont(ofSize: 14), .foregroundColor: NSColor(white: 0.8, alpha: 1)])
         ctx.textPosition = CGPoint(x: x + 8, y: top + 8)
         CTLineDraw(CTLineCreateWithAttributedString(sub), ctx)
-        x += widths[i] + gap
     }
     return ctx.makeImage()!
 }
@@ -1088,10 +1091,10 @@ for sc in scenarios {
 
 for sc in scenarios {
     let tiles = candidates.map { c in (label: c.title, sub: c.summary, image: images["\(c.key)|\(sc.key)"]!.0) }
-    writePNG(contactSheet(tiles: tiles, scale: scale), to: outDir.appendingPathComponent("sheet--\(sc.key).png"))
+    writePNG(contactSheet(tiles: tiles, cols: 3, scale: scale), to: outDir.appendingPathComponent("sheet--\(sc.key).png"))
 }
 for c in candidates {
     let tiles = scenarios.map { sc in (label: sc.title, sub: c.title, image: images["\(c.key)|\(sc.key)"]!.0) }
-    writePNG(contactSheet(tiles: tiles, scale: scale), to: outDir.appendingPathComponent("sheet--\(c.key).png"))
+    writePNG(contactSheet(tiles: tiles, cols: 2, scale: scale), to: outDir.appendingPathComponent("sheet--\(c.key).png"))
 }
 print("wrote \(images.count + scenarios.count + candidates.count) png(s) to \(outDir.path)")
