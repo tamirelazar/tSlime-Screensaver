@@ -1,0 +1,24 @@
+instances after respawn: 25347 
+alive through the window: 25347
+extension CPU: 35.0% of a core (summed over those instances)
+A1.timing.txt
+  pid 25347: n=   961  mean=9.798 ms
+  POOLED: n=961  mean=9.798 ms
+instances after respawn: 26028 
+alive through the window: 26028
+extension CPU: 35.1% of a core (summed over those instances)
+B.timing.txt
+  pid 26028: n=   960  mean=9.964 ms
+  POOLED: n=960  mean=9.964 ms
+instances after respawn: 26848 
+alive through the window: 26848
+extension CPU: 33.6% of a core (summed over those instances)
+A2.timing.txt
+  pid 26848: n=   936  mean=9.680 ms
+  POOLED: n=936  mean=9.680 ms
+instances after respawn: 30854 
+alive through the window: 30854
+extension CPU: 37.1% of a core (summed over those instances)
+A3-batched.timing.txt
+  pid 30854: n=  1080  mean=9.449 ms
+  POOLED: n=1080  mean=9.449 ms
