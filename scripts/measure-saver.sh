@@ -7,15 +7,27 @@
 # land on an unoptimized build; pass --no-build only when the running appex is
 # known to be the optimized one.
 #
-# The extension is hosted by more than one client, and a resident instance is
-# restarted by its client as fast as it is killed -- sometimes with a tslime
-# child of its own, rendering and costing CPU. So the instance to measure is
-# identified as the one that did not exist before this run launched the engine:
-# not the first pid, and not merely the first pid with a tslime child.
+# A screensaver session is started once, for the whole invocation, and each run
+# then measures a *fresh* instance by killing the running one and catching the
+# replacement: while a session is on screen, WallpaperAgent re-initializes the
+# screen-saver module about 200 ms after the plugin dies. The replacement is
+# therefore new by construction, is the instance actually on screen, and can
+# only be running the build installed now.
+#
+# Launching the engine per run is what this replaced, and why --runs N used to
+# yield one window instead of N (issue #19): killing processes does not end a
+# session, so loginwindow stays latched on "a screen saver is running" and every
+# later `open -a ScreenSaverEngine` exits in ~40 ms with "Screen Saver Already
+# Running". The novelty rule then had nothing to find, while the instance
+# WallpaperAgent had just brought back -- rendering at full rate -- was excluded
+# as pre-existing.
 #
 # A saver instance can vanish at any moment, because any user input dismisses
 # the screensaver, so the window is read incrementally and a short run is
 # reported as short rather than crashed on.
+#
+# For the same reason the script cannot put the screen back when it is done:
+# ending a session takes real input, so it leaves the saver up and says so.
 #
 # usage: scripts/measure-saver.sh [--seconds N] [--warmup N] [--sample N]
 #                                 [--runs N] [--min-window N]
@@ -97,30 +109,89 @@ pct() {
   echo "scale=1; ($c1 - $c0) * 100 / $secs" | bc
 }
 
-# Idempotent, and deliberately does not insist on an empty process list: a
-# resident instance is restarted by its client as fast as it is killed, so
-# looping on pkill only burns time and CPU. Whatever survives is snapshotted
-# before the next launch and excluded from selection instead.
-teardown() {
-  pkill -x ScreenSaverEngine 2>/dev/null || true
-  sleep 1
-  # The engine's view never gets stopAnimation on kill, so its tslime child leaks.
+# Kills every extension instance and its tslime child. This is not a teardown:
+# while a session is on screen WallpaperAgent re-initializes the module about
+# 200 ms later, so this is how measure_once *creates* a fresh instance. The
+# tslime child is killed explicitly because an instance that dies without
+# stopAnimation leaks it.
+kill_instances() {
   pkill -x tslime 2>/dev/null || true
   pkill -x AppexSaverMinimalExtension 2>/dev/null || true
-  sleep 2
+}
+
+# The pids in $2 that are absent from $1, one per line.
+new_since() {
+  local before="$1" now="$2" p
+  for p in $now; do
+    printf "%s\n" $before | grep -qx "$p" && continue
+    printf "%s\n" "$p"
+  done
+  return 0
+}
+
+# Puts a screensaver session on screen, once per invocation. Every run after
+# the first takes over from here by killing the instance and catching the
+# replacement, so the engine is launched at most once.
+start_saver() {
+  if [[ -n "$(instances)" ]]; then
+    echo "a screensaver session is already on screen"
+    return 0
+  fi
+  echo "launching ScreenSaverEngine"
+  open -a /System/Library/CoreServices/ScreenSaverEngine.app
+  local i
+  for i in $(seq 1 "$STARTUP_TIMEOUT"); do
+    [[ -n "$(instances)" ]] && return 0
+    sleep 1
+  done
+  echo "no saver instance appeared within ${STARTUP_TIMEOUT}s" >&2
+  # Two very different causes, and the engine's own log line separates them.
+  if /usr/bin/log show --last 60s --predicate 'process == "ScreenSaverEngine"' --style compact 2>/dev/null |
+       grep -q "Screen Saver Already Running"; then
+    echo "  ScreenSaverEngine exited with \"Screen Saver Already Running\": loginwindow still" >&2
+    echo "  holds a session, but no extension instance is up. Only user input clears that" >&2
+    echo "  state -- move the mouse or press a key, then run this again." >&2
+  else
+    echo "  ScreenSaverEngine started no instance. Check that the saver is selected in" >&2
+    echo "  System Settings." >&2
+  fi
+  blame_input
+  return 1
+}
+
+# Reports how the session was left. It does not end one, because nothing here
+# can: loginwindow latches "a screen saver is running" and only its event
+# monitor -- real keyboard or mouse input -- clears that. Killing processes
+# just hands WallpaperAgent another instance to re-initialize, so the old
+# teardown's pkill left a *fresh* instance rendering while printing "saver
+# stopped" (issue #19). `caffeinate -u` is no use either: it declares user
+# activity to power management, which the event monitor does not watch.
+stop_saver() {
+  if [[ -z "$(instances)" ]]; then
+    echo "saver stopped"
+    return 0
+  fi
+  echo "the screensaver is still on screen and costs a full instance until it is" >&2
+  echo "dismissed: press a key or move the mouse. Nothing this script can do ends a" >&2
+  echo "session -- killing the instance only makes WallpaperAgent start another." >&2
+  return 0
 }
 
 STOPPED=0
 cleanup() {
   local rc=$?
-  if [[ $KEEP -eq 0 && $STOPPED -eq 0 ]]; then teardown; fi
+  if [[ $KEEP -eq 0 && $STOPPED -eq 0 ]]; then stop_saver; fi
   exit $rc
 }
-trap cleanup EXIT INT TERM
 
 # Lets scripts/test-measure-saver.sh source the helpers above without launching
-# a saver; everything below this line is the measurement proper.
+# a saver; everything below this line is the measurement proper. The EXIT trap
+# is armed *after* it, because a sourcing script inherits the trap and would
+# end a session it never started -- which is why running the unit tests used to
+# tear down whatever saver happened to be on screen.
 [[ "${MEASURE_SAVER_SOURCE_ONLY:-0}" == "1" ]] && return 0
+
+trap cleanup EXIT INT TERM
 
 mkdir -p "$OUT"
 
@@ -128,55 +199,43 @@ if [[ $BUILD -eq 1 ]]; then
   "$REPO/scripts/build-saver.sh" --log "$OUT/build.log"
 fi
 
-# Launches the engine and measures one window into $1 (a run directory).
-# Echoes "elapsed ext_cpu ts_cpu views ended" on success; returns 1 if no saver
-# instance could be identified or the window was too short to report.
+# Measures one window into $1 (a run directory), on an instance this run
+# creates by killing the running one and catching WallpaperAgent's replacement.
+# Echoes "elapsed ext_cpu ts_cpu views ended" on success; returns 1 if no
+# instance came back or the window was too short to report.
 measure_once() {
   local dir="$1"
   mkdir -p "$dir"
 
-  echo "clearing any running saver instances"
-  teardown
-
-  # Anything still standing belongs to another client and must not be mistaken
-  # for ours -- including a resident instance that has a tslime child and is
-  # rendering, which is indistinguishable from the engine's by any other test.
-  local before pre_views p
+  local before p
   before="$(instances)"
-  pre_views=""
-  for p in $before; do pre_views="$pre_views $p:$(count "$(views_of "$p")")"; done
-  [[ -n "$before" ]] && echo "pre-existing instances:$pre_views"
+  echo "replacing the running instance(s): $(count "$before") up"
+  kill_instances
 
-  echo "launching ScreenSaverEngine"
-  open -a /System/Library/CoreServices/ScreenSaverEngine.app
-
-  # The saver instance is the one this launch created: a pid absent from the
-  # snapshot that has a tslime child. If the engine instead attached a view to
-  # an existing instance, that instance's child count goes up.
-  local ext="" views="" i
+  # The replacement is new by construction, so novelty identifies it without
+  # any of the old guesswork -- and it is waited on with a tslime child, so the
+  # window never opens before the view is running.
+  local ext="" fresh i
   for i in $(seq 1 "$STARTUP_TIMEOUT"); do
-    for p in $(instances); do
-      local n; n=$(count "$(views_of "$p")")
-      [[ "$n" -eq 0 ]] && continue
-      if ! printf "%s\n" $before | grep -qx "$p"; then ext="$p"; break; fi
-      local was; was=$(printf "%s" "$pre_views" | tr ' ' '\n' | grep "^$p:" | cut -d: -f2)
-      if [[ -n "$was" && "$n" -gt "$was" ]]; then ext="$p"; break; fi
+    sleep 1
+    fresh="$(new_since "$before" "$(instances)")"
+    [[ -z "$fresh" ]] && continue
+    for p in $fresh; do
+      [[ "$(count "$(views_of "$p")")" -gt 0 ]] && { ext="$p"; break; }
     done
     [[ -n "$ext" ]] && break
-    sleep 1
   done
   if [[ -z "$ext" ]]; then
-    echo "no new saver instance appeared within ${STARTUP_TIMEOUT}s" >&2
-    if [[ -z "$(pgrep -x ScreenSaverEngine || true)" ]]; then
-      echo "  ScreenSaverEngine is not running: it exited without starting a saver instance," >&2
-      echo "  or never launched. Check that the saver is selected in System Settings." >&2
-    fi
-    if [[ -n "$before" ]]; then
-      echo "  a resident instance ($before) was already running and was excluded on purpose;" >&2
-      echo "  the engine does not appear to start a second one while it is up." >&2
+    echo "no replacement instance appeared within ${STARTUP_TIMEOUT}s" >&2
+    if [[ -z "$(instances)" ]]; then
+      echo "  nothing came back, so the screensaver session has ended: there is no module" >&2
+      echo "  left for WallpaperAgent to re-initialize." >&2
     fi
     blame_input
     return 1
+  fi
+  if [[ "$(count "$fresh")" -gt 1 ]]; then
+    echo "WARNING: $(count "$fresh") instances came back; measuring $ext" >&2
   fi
 
   echo "saver instance pid $ext; warming up ${WARMUP}s"
@@ -247,6 +306,9 @@ measure_once() {
   return 0
 }
 
+# One session for the whole invocation; the runs take it from here.
+start_saver || exit 1
+
 RESULTS=()
 for ((run = 1; run <= RUNS; run++)); do
   [[ "$RUNS" -gt 1 ]] && echo "=== run $run of $RUNS ==="
@@ -310,8 +372,7 @@ digest() {
 } | tee "$OUT/summary.txt"
 
 if [[ $KEEP -eq 0 ]]; then
-  teardown
+  stop_saver
   STOPPED=1
-  echo "saver stopped"
 fi
 echo "artifacts: $OUT"

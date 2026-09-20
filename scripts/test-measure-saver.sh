@@ -62,5 +62,16 @@ echo "count"
 check "counts an empty list as 0" "$(count "")" "0"
 check "counts two pids" "$(count "$(printf '111\n222')")" "2"
 
+# Issue #19: a run now identifies its instance as the one WallpaperAgent brings
+# back after the run kills the current one, so this is the whole selection rule.
+echo "new_since"
+check "finds the replacement" "$(new_since "$(printf '111')" "$(printf '222')")" "222"
+check "reports nothing when nothing changed" "$(new_since "$(printf '111')" "$(printf '111')")" ""
+check "ignores survivors" "$(new_since "$(printf '111\n222')" "$(printf '222\n333')")" "333"
+check "reports every newcomer" "$(new_since "" "$(printf '111\n222')")" "$(printf '111\n222')"
+# A pid that is a prefix of another must not count as present: 11 surviving
+# would otherwise hide 111, and the run would measure the old instance.
+check "matches pids whole, not by prefix" "$(new_since "$(printf '11')" "$(printf '111')")" "111"
+
 if [[ $FAILED -eq 0 ]]; then echo "all checks passed"; else echo "FAILURES"; fi
 exit $FAILED
