@@ -1,0 +1,8 @@
+diag braille applied source=procedural dot=0.780 corner=0.300
+diag launchProcess grid=190x56 frame=1920x1080
+diag font registered JuliaMono-Bold
+diag font registered JetBrainsMonoNFM-Regular
+diag font -> JuliaMono-Bold grid=190x56 -> 200x56 running=true
+diag braille applied source=juliaMonoBold dot=0.780 corner=0.300
+diag font -> JetBrainsMonoNFM-Regular grid=200x56 -> 200x49 running=true
+diag braille applied source=jetBrainsMonoNerdFontMono dot=0.780 corner=0.300
