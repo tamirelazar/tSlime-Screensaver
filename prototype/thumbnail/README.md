@@ -2,7 +2,7 @@
 
 Throwaway primary source for [What should the screen-saver settings thumbnail show?](https://github.com/tamirelazar/tSlime-Screensaver/issues/46).
 
-**Status: awaiting the owner's visual choice.** No production implementation or System Settings verification has occurred. Worktree: `prototype/thumbnail`, based on `debea33` from `wayfinder/look`. Existing uncommitted theme work in the main checkout is untouched.
+**Selected: C — live 64 × 20, following the chosen theme.** The owner chose C after viewing the comparison on 2026-09-22. The larger braille texture is intentional despite the loss of fine detail. Native implementation is being integrated on `wayfinder/look`; System Settings verification remains pending. Worktree: `prototype/thumbnail`, based on `debea33`. Existing uncommitted theme work is preserved.
 
 ## Review
 
@@ -40,7 +40,7 @@ The screenshot sheets are `shots/comparison-{young,network,mature}.png`. The HTM
 
 The smaller grids are not an automatic improvement. A retains the smoothest network shapes in these snapshots. B shows more dot texture but a coarser network; C loses too much detail. D makes the dots easy to see at the cost of the frame and overall composition. A curated image would improve consistency and remove simulation work from the preview instance, but still requires a visual choice and an asset policy.
 
-This evidence does not establish that the actual native thumbnail looks like A, nor reproduce the reported native noise. A real-pane baseline is the next discriminating check before implementation.
+This evidence does not establish that the actual native thumbnail looks like A, nor reproduce the reported native noise. The owner selected C as the desired treatment; the native-pane check remains necessary to judge host scaling and moving appearance.
 
 ## Implementation pointers
 
