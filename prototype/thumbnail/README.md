@@ -2,7 +2,7 @@
 
 Throwaway primary source for [What should the screen-saver settings thumbnail show?](https://github.com/tamirelazar/tSlime-Screensaver/issues/46).
 
-**Selected: C — live 64 × 20, following the chosen theme.** The owner chose C after viewing the comparison on 2026-09-22. The larger braille texture is intentional despite the loss of fine detail. Native implementation is being integrated on `wayfinder/look`; System Settings verification remains pending. Worktree: `prototype/thumbnail`, based on `debea33`. Existing uncommitted theme work is preserved.
+**Selected look: C — live 64 × 20, following the chosen theme. Implementation remains unresolved.** The owner chose C on 2026-09-22. Native testing showed that the large selected-saver image uses the false instance, so the true-instance implementation was reverted. The [geometry audit](geometry-probe/README.md) also measured a roughly 16:10 native slot and about 10% horizontal compression of a 16:9 source. The 190 × 100 browser study below is historical design evidence, not an accurate native preview. See the [routing comparison](routing-probe/README.md) and geometry audit before further implementation. Existing uncommitted product theme work remains preserved.
 
 ## Review
 
