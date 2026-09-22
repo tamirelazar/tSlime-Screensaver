@@ -2,6 +2,10 @@
 
 Throwaway comparison for [How should the login-screen cards look?](https://github.com/tamirelazar/tSlime-Screensaver/issues/42).
 
+**Resolved: retain the existing appearance.** After reviewing the real native
+login controls over the running saver, the owner chose no special treatment.
+The linked ticket holds the decision; these studies remain reference artifacts.
+
 The owner chose to compare treatments before deciding whether the brief overlap
 between the running saver and the login UI warrants cards.
 
@@ -21,7 +25,7 @@ motion, alternate accounts and authentication states are not reproduced.
 
 **Live overlap is now visually verified on this Mac (2026-09-22, 20:20).**
 The native clock, avatar, name and password field appeared over the running
-saver. The appearance choice remains open; see the reproduction below.
+saver. See the reproduction below.
 
 ## Sources
 
