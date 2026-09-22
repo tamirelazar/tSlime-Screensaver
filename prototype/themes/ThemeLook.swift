@@ -17,6 +17,7 @@ import CoreText
 
 struct Candidate {
     let id, name, palette, inner, outer, accent, idea: String
+    var chosen = true
     var flags: String {
         var f = "--palette \(palette)"
         if inner != "-" { f += " --bg-color-inner \(inner)" }
@@ -31,8 +32,10 @@ func loadCandidates(_ path: String) -> [Candidate] {
     return text.split(separator: "\n").filter { !$0.hasPrefix("#") && !$0.isEmpty }.compactMap { line in
         let f = line.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
         guard f.count >= 6 else { return nil }
-        return Candidate(id: f[0], name: f[1], palette: f[2], inner: f[3], outer: f[4], accent: f[5],
-                         idea: f.count > 6 ? f[6] : "")
+        var c = Candidate(id: f[0], name: f[1], palette: f[2], inner: f[3], outer: f[4], accent: f[5],
+                          idea: f.count > 6 ? f[6] : "")
+        if f.count > 7 { c.chosen = f[7] == "1" }
+        return c
     }
 }
 
@@ -267,10 +270,18 @@ for cand in loadCandidates(listPath) {
     guard let text = try? String(contentsOf: f, encoding: .utf8) else { print("missing frame \(f.path)"); continue }
     let img = renderFrame(parseFrame(text), cols: cols, rows: rows)
     writePNG(img, shotsDir.appendingPathComponent("\(cand.id)-\(cand.name).png").path)
+    writePNG(img.cropping(to: CGRect(x: Int(m.width * scale * 12), y: 0, width: 1100, height: 640))!,
+             shotsDir.appendingPathComponent("\(cand.id)-\(cand.name)-crop.png").path)
     tiles.append((img, cand))
     print("\(cand.id) \(cand.name): \(img.width)x\(img.height)")
 }
 let fw = tiles.first!.0.width, fh = tiles.first!.0.height
+let queue = tiles.filter { $0.1.chosen }
+if queue.count < tiles.count {
+    let q = sheet(tiles: queue, tileW: Int(Double(fw) * 0.35), tileH: Int(Double(fh) * 0.35), columns: 3, header: 80, gap: 30,
+                  interpolation: .high, crop: nil, title: "\(round): the chosen candidates, whole frame")
+    writePNG(q, shotsDir.appendingPathComponent("queue-sheet.png").path)
+}
 // Whole frames at 0.35 of the 2x backing, three across.
 let s = sheet(tiles: tiles, tileW: Int(Double(fw) * 0.35), tileH: Int(Double(fh) * 0.35), columns: 3, header: 80, gap: 30,
               interpolation: .high, crop: nil, title: "\(round): whole frame, 190x56 at 0.35 of the 2x backing")
@@ -282,4 +293,11 @@ let cropRect = CGRect(x: Int(cellPxW * 12), y: 0, width: cropW, height: cropH)
 let c = sheet(tiles: tiles, tileW: cropW, tileH: cropH, columns: 3, header: 80, gap: 30,
               interpolation: .none, crop: cropRect, title: "\(round): top-left of the window, real 2x pixels")
 writePNG(c, shotsDir.appendingPathComponent("crop-sheet.png").path)
+// One sheet per candidate (tiles whose id shares a first letter), two across, for judging a tree on its own.
+let groups = Dictionary(grouping: tiles, by: { String($0.1.id.prefix(1)) })
+for (g, ts) in groups where ts.count > 1 {
+    let gs = sheet(tiles: ts.sorted { $0.1.id < $1.1.id }, tileW: Int(Double(fw) * 0.42), tileH: Int(Double(fh) * 0.42), columns: 2, header: 80, gap: 30,
+                   interpolation: .high, crop: nil, title: "\(round): candidate \(g)")
+    writePNG(gs, shotsDir.appendingPathComponent("candidate-\(g).png").path)
+}
 print("wrote \(shotsDir.path)  cell \(m.width)x\(m.height) pt")

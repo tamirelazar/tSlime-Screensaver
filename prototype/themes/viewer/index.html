@@ -1,0 +1,125 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Themes viewer</title>
+<style>
+  :root { --bg:#1c1c1e; --panel:#2c2c2e; --text:#e5e5ea; --dim:#98989d; --line:#3a3a3c; --accent:#ffd60a; }
+  html, body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 -apple-system, "SF Pro Text", Helvetica, sans-serif; }
+  body { display:grid; grid-template-columns: 300px 1fr; height:100vh; }
+  aside { border-right:1px solid var(--line); overflow:auto; padding:14px; }
+  main { overflow:auto; padding:18px 26px 40px; }
+  h1 { font-size:15px; margin:0 0 6px; } h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:22px 0 8px; }
+  .concept { color:var(--dim); white-space:pre-wrap; margin-bottom:12px; }
+  .q { list-style:none; padding:0; margin:0; }
+  .q li { display:flex; gap:10px; align-items:center; padding:7px 8px; border-radius:8px; cursor:pointer; }
+  .q li.on { background:var(--panel); } .q li img { width:84px; height:47px; object-fit:cover; border-radius:3px; }
+  .q li .t { font-weight:600; } .q li .s { color:var(--dim); font-size:12px; }
+  .q li.draft .t { font-weight:400; font-style:italic; }
+  .frame { background:#000; border-radius:6px; overflow:hidden; }
+  .frame img { display:block; width:100%; image-rendering:auto; }
+  .frame img.crop { image-rendering:pixelated; }
+  .bar { display:flex; gap:14px; align-items:center; margin:10px 0 4px; flex-wrap:wrap; }
+  .bar label, .bar button { color:var(--dim); font-size:13px; } button { background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:6px; padding:4px 10px; cursor:pointer; }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .chip { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--dim); }
+  .chip i { width:22px; height:22px; border-radius:5px; border:1px solid var(--line); display:inline-block; }
+  .ramp { display:flex; height:26px; border-radius:5px; overflow:hidden; border:1px solid var(--line); width:min(100%, 640px); }
+  .ramp i { flex:1; }
+  code { background:var(--panel); padding:2px 6px; border-radius:4px; font-size:12px; user-select:all; }
+  .flags { color:var(--dim); font-size:12px; margin:8px 0; word-break:break-all; }
+  .why { white-space:pre-wrap; }
+  .drafts { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:14px; }
+  .draft { background:var(--panel); border-radius:8px; padding:10px; cursor:pointer; border:1px solid transparent; }
+  .draft.on { border-color:var(--accent); } .draft img { width:100%; border-radius:4px; display:block; }
+  .draft .t { font-weight:600; margin:8px 0 2px; } .draft .r { color:var(--dim); font-size:12px; white-space:pre-wrap; }
+  .tag { font-size:11px; padding:2px 7px; border-radius:10px; background:var(--line); color:var(--dim); margin-left:6px; vertical-align:middle; }
+  .tag.chosen { background:#3a3a1a; color:var(--accent); }
+  .tree li { margin:3px 0; }
+  kbd { color:var(--dim); font-size:12px; }
+</style>
+<aside>
+  <h1 id="round"></h1>
+  <div class="concept" id="overarching"></div>
+  <label><input type="checkbox" id="withDrafts"> include drafts in the queue</label>
+  <h2>Queue <kbd>← →</kbd></h2>
+  <ul class="q" id="queue"></ul>
+</aside>
+<main>
+  <div class="bar">
+    <h1 id="title"></h1>
+    <label><input type="radio" name="stage" value="" checked> mature (30 s)</label>
+    <label><input type="radio" name="stage" value="-young"> young (8 s)</label>
+    <label><input type="checkbox" id="cropBox"> real pixels, top-left</label>
+  </div>
+  <div class="frame"><img id="shot" alt=""></div>
+  <div class="bar" style="margin-top:12px">
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="ramp" id="ramp"></div>
+  <div class="flags" id="flags"></div>
+  <h2>Concept</h2><div class="why" id="concept"></div>
+  <h2>Decision tree</h2><ul class="tree" id="tree"></ul>
+  <h2>This alternative</h2><div class="why" id="rationale"></div>
+  <h2 id="whyHead">Why it was chosen</h2><div class="why" id="reason"></div>
+  <h2>Alternatives from the same tree</h2><div class="drafts" id="drafts"></div>
+</main>
+<script src="data.js"></script>
+<script>
+const D = window.THEMES, R = D.round;
+const $ = s => document.querySelector(s);
+let items = [], cur = 0, stage = '', crop = false;
+function shotPath(a, stg, crp) { return `../shots/${R}${stg}/${a.id}-${a.name}${crp ? '-crop' : ''}.png`; }
+function buildQueue() {
+  const withDrafts = $('#withDrafts').checked;
+  items = [];
+  for (const c of D.candidates) for (const a of c.alternatives) {
+    const chosen = a.id === c.chosen;
+    if (chosen || withDrafts) items.push({ c, a, chosen });
+  }
+  const ul = $('#queue'); ul.innerHTML = '';
+  items.forEach((it, i) => {
+    const li = document.createElement('li'); li.className = it.chosen ? '' : 'draft';
+    li.innerHTML = `<img src="${shotPath(it.a, '', false)}"><div><div class="t">${it.c.id} · ${it.c.title}</div><div class="s">${it.a.id} ${it.a.name}</div></div>`;
+    li.onclick = () => show(i); ul.appendChild(li);
+  });
+  show(Math.min(cur, items.length - 1));
+}
+function show(i) {
+  cur = i; const { c, a, chosen } = items[i];
+  document.querySelectorAll('.q li').forEach((li, j) => li.classList.toggle('on', j === i));
+  $('#title').innerHTML = `${c.id} · ${c.title} <span class="tag ${chosen ? 'chosen' : ''}">${chosen ? 'chosen' : 'draft'}: ${a.id} ${a.name}</span>`;
+  const img = $('#shot'); img.src = shotPath(a, stage, crop); img.className = crop ? 'crop' : '';
+  const f = a.flags, hex = h => h === '-' ? '#000' : '#' + h;
+  $('#chips').innerHTML = [['inner', f.inner], ['outer', f.outer], ['accent', f.accent]].map(([k, v]) =>
+    `<span class="chip"><i style="background:${hex(v)}"></i>${k} <code>${v}</code></span>`).join('');
+  const stops = f.palette.startsWith('#') ? f.palette.split(',') : [];
+  $('#ramp').innerHTML = stops.length ? stops.map(s => `<i style="background:${s}" title="${s}"></i>`).join('') : `<span class="chip" style="padding:4px 8px">named palette: ${f.palette}</span>`;
+  $('#flags').innerHTML = `<code>--palette "${f.palette}" --bg-color-inner ${f.inner} --bg-color-outer ${f.outer} --accent-color ${f.accent}</code>`;
+  $('#concept').textContent = c.concept;
+  $('#tree').innerHTML = (c.tree || []).map(t => `<li>${t}</li>`).join('');
+  $('#rationale').textContent = a.rationale + (a.check ? '\n\nGamut check: ' + a.check : '');
+  $('#whyHead').textContent = chosen ? `Why ${a.id} was chosen` : `Why ${c.chosen} was chosen over this`;
+  $('#reason').textContent = c.reason || '';
+  $('#drafts').innerHTML = c.alternatives.map(x => `<div class="draft ${x.id === a.id ? 'on' : ''}" data-id="${x.id}">
+      <img src="${shotPath(x, stage, false)}"><div class="t">${x.id} ${x.name}${x.id === c.chosen ? '<span class="tag chosen">chosen</span>' : ''}</div><div class="r">${x.rationale}</div></div>`).join('');
+  document.querySelectorAll('.draft').forEach(el => el.onclick = () => {
+    const id = el.dataset.id; let j = items.findIndex(it => it.a.id === id);
+    if (j < 0) { items.splice(cur + 1, 0, { c, a: c.alternatives.find(x => x.id === id), chosen: false }); j = cur + 1; buildList(); }
+    show(j);
+  });
+}
+function buildList() { // re-render the queue list without resetting selection
+  const ul = $('#queue'); ul.innerHTML = '';
+  items.forEach((it, i) => { const li = document.createElement('li'); li.className = it.chosen ? '' : 'draft';
+    li.innerHTML = `<img src="${shotPath(it.a, '', false)}"><div><div class="t">${it.c.id} · ${it.c.title}</div><div class="s">${it.a.id} ${it.a.name}</div></div>`;
+    li.onclick = () => show(i); ul.appendChild(li); });
+}
+$('#round').textContent = R; $('#overarching').textContent = D.concept || '';
+$('#withDrafts').onchange = buildQueue;
+document.querySelectorAll('input[name=stage]').forEach(r => r.onchange = e => { stage = e.target.value; show(cur); });
+$('#cropBox').onchange = e => { crop = e.target.checked; show(cur); };
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') show((cur + 1) % items.length);
+  if (e.key === 'ArrowLeft') show((cur - 1 + items.length) % items.length);
+});
+buildQueue();
+</script>
