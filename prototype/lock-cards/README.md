@@ -19,6 +19,10 @@ observed over this Mac's wallpaper, not captured native UI over the saver.
 The avatar is a neutral placeholder. macOS's translucent clock material,
 motion, alternate accounts and authentication states are not reproduced.
 
+**Live overlap is now visually verified on this Mac (2026-09-22, 20:20).**
+The native clock, avatar, name and password field appeared over the running
+saver. The appearance choice remains open; see the reproduction below.
+
 ## Sources
 
 - `frames/{dense,trails}.png`: unchanged `00-bare.png` assets from
@@ -69,6 +73,92 @@ The login group is near the **bottom**, not the centre guessed from the
 private-layout research. These bounds describe one display/configuration,
 not a stable macOS geometry contract. A chosen treatment still needs a
 live-saver check and a decision about layout uncertainty before production.
+
+## Feasibility — verified on this Mac
+
+The successful attempt began at 20:20:13 on 2026-09-22, after a fresh explicit
+"ready" from the owner. With the password delay set to Immediately, starting
+the saver and then pressing Shift raised the native login UI over its content.
+The event-triggered capture caught the actual overlap, rather than a later
+wallpaper session:
+
+- 20:20:13.053: loginwindow reported password delay 0.
+- 20:20:13.146: WallpaperAgent identified saver extension PID 86007.
+- 20:20:19.664: the lock-UI notify state changed to 1.
+- Three screenshots at approximately 20:20:19–20 visibly show the native clock,
+  avatar, name and password field over Oozel. The same extension reports
+  30 presented frames per second throughout the overlap.
+- 20:20:49.676: the UI state returned to 0 after about 30 seconds idle, while
+  that same saver instance continued rendering. It rose again at 20:20:57.159.
+- Authentication succeeded at 20:20:59.194 and the session then ended.
+- The password delay was restored to **After 15 minutes**, verified in System
+  Settings after the test.
+
+Raw captures and the notify samples remain local in the ignored folder
+`captures/20260922-202002-triggered/`. The representative image is
+`overlap-2.png`. This verifies visible overlap and the externally observed
+state signal on this configuration; it does not yet test a card implementation
+or notification delivery inside the actual extension.
+
+### Reproduce
+
+1. Temporarily set System Settings → Lock Screen → Require password to
+   **Immediately**. Let the owner authenticate directly if requested.
+2. Explain the input sequence and **wait for a fresh explicit "ready"** before
+   starting the saver. Prior general permission is not a readiness signal.
+3. Run `bash prototype/lock-cards/capture-on-overlap.sh`. It arms the read-only
+   observer, waits ten seconds, and starts ScreenSaverEngine.
+4. After five seconds of animation, the owner taps Shift once, leaves the UI
+   untouched for ten seconds, then unlocks normally. The script captures three
+   frames on the first simultaneous UI-visible/extension-present sample.
+5. Restore **After 15 minutes** and verify the value in System Settings.
+
+Starting with Control-Command-Q produced wallpaper instead in the earlier
+attempt. With a 15-minute grace period, input before the grace expires simply
+dismisses the saver. Neither is the working quick reproduction above.
+
+### Earlier attempts and research correction
+
+On 2026-09-22 the owner asked to establish reproducible live overlap before
+doing any more appearance work. Historical log rechecking also corrects the
+research's original 2026-09-21 01:52 session: at 01:52:56.979, loginwindow
+reported a preferred screen-lock delay of **900**, not the 0 stated in the
+research table. The known raises after display sleep cannot prove live overlap.
+
+`observe-overlap.c` is a read-only helper that samples the lock-UI notify state
+and extension PIDs four times a second. Build and run it with:
+
+```
+clang -Wall -Wextra -Werror prototype/lock-cards/observe-overlap.c -o prototype/lock-cards/.build/observe-overlap
+prototype/lock-cards/.build/observe-overlap 30
+```
+
+It needs access to notifyd and the process list outside the agent sandbox.
+An unlocked-desktop control run returned `lock_ui=0 extension_pids=none`
+and `NO_OVERLAP_OBSERVED`. This verifies the reader, not the target behavior.
+Even a candidate overlap is not proof by itself: a settings preview instance
+could be alive. Identify the same saver PID across the transition and confirm
+the actual clock/login UI over its content in a contemporaneous screenshot.
+
+The owner authorized temporarily changing the password requirement to
+Immediately, running the experiment, and restoring 15 minutes. Both setting
+values were verified in System Settings; restoration is complete.
+
+The immediate-password attempt at 20:09:25 remains visually inconclusive:
+
+- 20:09:25.568: loginwindow confirmed the password delay was 0.
+- 20:09:26.027: saver extension PID 81967 started.
+- 20:09:26.087–27.292: login UI was raised. The observer simultaneously saw
+  `lock_ui=1` and that same extension PID in five samples.
+- 20:09:27.258: password authentication succeeded; the UI was then lowered,
+  the screensaver session stopped, and the extension exited at 27.646.
+- The first screenshot at 20:09:28 was too late: it shows a new direct-lock
+  session over the wallpaper. Later captures also do not establish overlap.
+
+That attempt was evidence of brief concurrent process/UI state, not visual proof.
+It does not show that macOS inherently tears down the saver on raising login
+UI: a successful unlock ended this attempt. The successful follow-up above
+triggered on the first overlap sample rather than waiting three seconds.
 
 ## Capture — requires permission to take the display
 
