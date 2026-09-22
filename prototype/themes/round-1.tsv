@@ -1,0 +1,14 @@
+# id	name	palette	inner	outer	accent	idea
+00	baseline	moss	-	-	-	what ships today: no colour flags, chrome follows the palette
+01	ember	heat	120a06	000000	ffb347	warm near-black field on pure black, amber ring
+02	deep-sea	ocean	061018	0c1c2a	5fd3ff	cool field, lighter cool surround, cyan ring
+03	parchment	ink	ece6d6	dcd4c2	3a3630	the one light theme: ink trails on paper
+04	plum-teal	copper	101820	2a1020	ffb347	the #38 test: plum surround, dark teal field, amber ring
+05	graphite	mono	000000	000000	7a7a7a	monochrome on black, grey ring
+06	neon-night	neon	000000	0a0a16	ff2bd6	black field, faint indigo surround, magenta ring
+07	moss-slate	moss	0e1410	1c2226	a8c690	moss field in a lighter neutral surround, sage ring
+08	cosmic	cosmic	08060f	000000	c9a0ff	violet-black field on black, lilac ring
+09	jade-field	jade	00160f	00160f	3ad7a0	one field edge to edge, only the ring marks the window
+10	amber-crt	amber	0c0800	0c0800	ffb000	classic amber terminal, one field
+11	swamp-olive	swamp	141a0c	262e16	e6e6a8	olive field, lighter olive surround, straw ring
+12	borderless-slate	slate	0f141a	000000	0f141a	ring painted in the field colour: a borderless window on black
