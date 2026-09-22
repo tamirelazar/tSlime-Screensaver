@@ -1,0 +1,2 @@
+# ANSI terminal captures preserve every blank cell, including trailing spaces.
+frames/*.txt binary

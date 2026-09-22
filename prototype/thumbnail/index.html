@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oozel · Thumbnail prototype</title>
+<style>
+  :root { color-scheme: dark; font: 15px/1.5 -apple-system, BlinkMacSystemFont, sans-serif; color: #eceef2; background: #202227; accent-color: #a5cbb4; }
+  * { box-sizing: border-box; }
+  body { max-width: 1154px; margin: auto; padding: 32px 28px 120px; }
+  h1 { margin: 0 0 8px; font-size: 28px; font-weight: 600; letter-spacing: -.02em; }
+  h2 { margin: 30px 0 12px; font-size: 16px; font-weight: 600; }
+  p { max-width: 74ch; margin: 8px 0 20px; color: #bfc4ce; }
+  label, button, select { font: inherit; }
+  select, button { background: #30343b; color: #eceef2; border: 1px solid #696f7b; border-radius: 6px; padding: 7px 11px; cursor: pointer; }
+  button:hover, select:hover { background: #414650; }
+  :focus-visible { outline: 2px solid #b6e2c7; outline-offset: 4px; }
+  ::selection { background: #b6e2c7; color: #202227; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin: 22px 0 30px; }
+  .row { display: grid; grid-template-columns: repeat(auto-fit, 190px); gap: 22px; }
+  .tile { padding: 0; border: 0; background: transparent; border-radius: 0; text-align: left; }
+  .tile:hover { background: transparent; }
+  .tile img { display: block; width: 190px; height: 100px; margin-top: 8px; border-radius: 6px; }
+  .tile[aria-pressed=true] img { outline: 2px solid #b6e2c7; outline-offset: 3px; }
+  .tile span { display: block; font-size: 13px; }
+  .tile small { display: block; color: #bfc4ce; font-size: 11px; margin-top: 8px; }
+  #detail { border-top: 1px solid #50555e; margin-top: 32px; padding-top: 20px; }
+  #detail h2 { margin: 0 0 8px; }
+  #detail p { margin: 8px 0; }
+  #loupe { display: flex; flex-wrap: wrap; gap: 24px; margin: 24px 0; }
+  #loupe[hidden] { display: none; }
+  #loupe img { width: 380px; height: 200px; max-width: 100%; object-fit: contain; }
+  footer { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; padding: 9px 12px; border: 1px solid #767f8d; border-radius: 12px; background: #30343b; white-space: nowrap; }
+  footer output { min-width: 156px; text-align: center; font-size: 13px; }
+  footer button { border: 0; padding: 6px 12px; }
+  .note { margin-top: 30px; font-size: 13px; }
+  @media (max-width: 500px) { body { padding: 22px 20px 110px; } footer { gap: 4px; } }
+</style>
+<h1>What should the thumbnail show?</h1>
+<p>Five treatments at <strong>190 × 100 pixels in the browser</strong>, the approximate size recorded in System Settings. Actual tslime captures, rendered with the saver's procedural braille metrics. Keep browser zoom at 100%.</p>
+<div class="controls">
+  <label>Simulation age <select id="stage"><option value="young">3 seconds · early</option><option value="network" selected>8 seconds · network</option><option value="mature">20 seconds · mature</option></select></label>
+  <label><input id="magnify" type="checkbox"> Show a 2× loupe</label>
+</div>
+<main id="comparison"></main>
+<section id="detail" aria-live="polite"></section>
+<div id="loupe" hidden></div>
+<p class="note">These are snapshots, not motion or performance tests. Changing the age samples the live proposals; the curated still stays fixed. A single seed, Organic preset, random initialization and 30 fps are shared. Different grids keep the same underlying simulation resolution. Host scaling and the exact System Settings slot still need a check in the real pane.</p>
+<footer aria-label="Prototype variant switcher"><button id="prev" aria-label="Previous treatment">←</button><output id="selection"></output><button id="next" aria-label="Next treatment">→</button></footer>
+<script>
+const variants = [
+ {name:'A · Current', short:'190 × 56, whole frame', detail:'The current full grid scaled down into the thumbnail. The whole composition fits, but the small dots blend together.', implementation:'The preview instance keeps its full-screen terminal geometry and its existing 30 fps cap.'},
+ {name:'B · Live, 96 × 28', short:'About twice the cell size', detail:'A smaller live grid retains the frame and gives the simulation more visible cells. The theme and its chosen border remain recognizable.', implementation:'Give only the preview instance a smaller logical terminal surface, scaled to fill its host surface. Keep its PTY grid synchronized on layout and font changes; keep the existing 30 fps cap.'},
+ {name:'C · Live, 64 × 20', short:'Chunkier cells, less detail', detail:'Larger cells emphasize braille texture. The glow border consumes much of this small grid; broad structures may collapse into dense patches.', implementation:'Use the same preview-only logical-surface approach as B, at a still smaller grid.'},
+ {name:'D · Centre crop', short:'64 columns from full frame', detail:'Magnify the centre of the existing full-grid render. Dots become visible, while the frame and much of the composition fall outside the thumbnail.', implementation:'Keep the full-grid terminal running behind a clipping wrapper. A fixed central crop follows whatever moves through it, including quiet regions.'},
+ {name:'E · Curated still', short:'Hold the 8-second B frame', detail:'Use a composed frame that stays consistent every time Settings opens. This sample holds B’s network snapshot; a final still would be chosen by eye.', implementation:'The preview instance displays a bundled image without launching tslime. Matching the chosen theme, palette variant and border requires corresponding assets or a separate generation strategy.'}
+];
+const themes = [{id:'S2', name:'Studio · Young leaf · simple border'}, {id:'N1', name:'Nocturne · Ion blue · glow border'}];
+const params = new URLSearchParams(location.search);
+let variant = Math.min(4, Math.max(0, Number(params.get('variant')) || 0));
+if (['young','network','mature'].includes(params.get('stage'))) document.querySelector('#stage').value = params.get('stage');
+function select(value) { variant = (value + 5) % 5; render(); }
+function render() {
+ const stage = document.querySelector('#stage').value;
+ const p = new URLSearchParams({variant, stage}); history.replaceState(null, '', '?' + p);
+ document.querySelector('#comparison').innerHTML = themes.map(t => `<section><h2>${t.name}</h2><div class="row">${variants.map((v,i) => `<button class="tile" data-variant="${i}" aria-pressed="${i===variant}"><span>${v.name}</span><img width="190" height="100" src="shots/${t.id}-${stage}-${i}.png" alt="${t.name}, ${v.name}, ${stage} stage"><small>${v.short}</small></button>`).join('')}</div></section>`).join('');
+ const v = variants[variant];
+ document.querySelector('#detail').innerHTML = `<h2>${v.name}</h2><p>${v.detail}</p><p>${v.implementation}</p><p>Theme behavior: all five proposals are shown in the selected theme. The still needs an asset for each supported appearance.</p>`;
+ document.querySelector('#selection').textContent = v.name;
+ document.querySelector('#loupe').innerHTML = themes.map(t => `<img src="shots/${t.id}-${stage}-${variant}.png" alt="2× loupe: ${t.name}, ${v.name}">`).join('');
+ document.querySelector('#loupe').hidden = !document.querySelector('#magnify').checked;
+}
+document.querySelector('#comparison').addEventListener('click', e => { const b=e.target.closest('[data-variant]'); if(b) select(Number(b.dataset.variant)); });
+document.querySelector('#prev').onclick = () => select(variant - 1);
+document.querySelector('#next').onclick = () => select(variant + 1);
+document.querySelector('#stage').onchange = render;
+document.querySelector('#magnify').onchange = render;
+document.addEventListener('keydown', e => { if(e.target.matches('input,select,textarea,[contenteditable]'))return; if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();select(variant+(e.key==='ArrowRight'?1:-1));} });
+render();
+</script>
+</html>

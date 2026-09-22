@@ -1,0 +1,33 @@
+{
+  "binary": "/private/tmp/tSlime-thumbnail/AppexSaverMinimal/tslime",
+  "sha256": "a4da8b6050f79af42d999513c52a98abea1994368c7e85a794eb8ee9b38bb772",
+  "args": [
+    "--window-frame",
+    "glow",
+    "--frame-matte-cols",
+    "4",
+    "--frame-matte-rows",
+    "1",
+    "--fps",
+    "30",
+    "--skip-warmup",
+    "--seed",
+    "7",
+    "--preset",
+    "organic",
+    "--init",
+    "random",
+    "--palette",
+    "#4b487f,#5d5eb7,#6976f3,#53a0ff,#54c4ff,#63d3f9,#7fe0f3,#9eeaee,#b7f0ef,#cff5f2,#e6faf7",
+    "--bg-color-inner",
+    "292c34",
+    "--bg-color-outer",
+    "252931",
+    "--accent-color",
+    "424a69"
+  ],
+  "cols": 96,
+  "rows": 28,
+  "seconds": 8,
+  "note": "Wall-clock capture; seed fixes initialization, exact timestep is not asserted."
+}
