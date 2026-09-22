@@ -1,0 +1,160 @@
+2026-09-22 22:51:25.889 Df Routing Probe Appex[45841:47fdff] ROUTING-PROBE request command=startAnimation preview=(null)
+2026-09-22 22:51:25.891 Df Routing Probe Appex[45833:47fdfd] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 22:51:25.892 Df Routing Probe Appex[45841:47fdfe] ROUTING-PROBE request command=handshake preview=0
+2026-09-22 22:51:25.893 Df Routing Probe Appex[45833:47fdfc] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 22:51:25.897 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE init kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:25.897 Df Routing Probe Appex[45841:47fd73] [local.oozel.routing-probe:routing] PROBE init kind=APPEX preview=0 pid=45841 frame={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:25.916 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={1920, 1080}
+2026-09-22 22:51:25.916 Df Routing Probe Appex[45841:47fd73] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=0 pid=45841 size={1920, 1080}
+2026-09-22 22:51:25.916 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}} window={{1185, 307}, {1920, 1080}}
+2026-09-22 22:51:25.916 Df Routing Probe Appex[45841:47fd73] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=0 pid=45841 frame={{0, 0}, {1920, 1080}} window={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:25.926 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE init kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:25.927 Df Routing Probe Appex[45841:47fd73] [local.oozel.routing-probe:routing] PROBE draw kind=APPEX preview=0 pid=45841 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:25.927 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={1920, 1080}
+2026-09-22 22:51:25.927 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}} window={{1185, 307}, {1920, 1080}}
+2026-09-22 22:51:25.928 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}} window={{0, 0}, {0, 0}}
+2026-09-22 22:51:25.929 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE draw kind=APPEX preview=1 pid=45833 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:25.946 Df Routing Probe Appex[45841:47fd73] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=0 pid=45841 frame={{0, 0}, {1920, 1080}} window={{0, 0}, {0, 0}}
+2026-09-22 22:51:25.946 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={0, 0}
+2026-09-22 22:51:25.946 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={0, 0}
+2026-09-22 22:51:25.947 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 22:51:26.046 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE init kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}}
+2026-09-22 22:51:26.046 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE init kind=LEGACY preview=0 pid=45836 frame={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:26.046 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=1 pid=45835 size={0, 0}
+2026-09-22 22:51:26.046 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=0 pid=45836 size={1920, 1080}
+2026-09-22 22:51:26.046 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}} window={{1185, 307}, {0, 0}}
+2026-09-22 22:51:26.046 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=0 pid=45836 frame={{0, 0}, {1920, 1080}} window={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:26.048 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=1 pid=45835 size={133, 16}
+2026-09-22 22:51:26.049 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE draw kind=LEGACY preview=0 pid=45836 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:26.049 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE init kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}}
+2026-09-22 22:51:26.050 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE draw kind=LEGACY preview=1 pid=45835 bounds={{0, 0}, {133, 16}}
+2026-09-22 22:51:27.825 Df Routing Probe Appex[45833:47fdfd] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 22:51:27.826 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE init kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:27.827 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={1920, 1080}
+2026-09-22 22:51:27.827 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}} window={{1185, 307}, {1920, 1080}}
+2026-09-22 22:51:27.828 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE draw kind=APPEX preview=1 pid=45833 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:27.833 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={0, 0}
+2026-09-22 22:51:27.833 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={0, 0}
+2026-09-22 22:51:27.839 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 22:51:27.840 Df Routing Probe Appex[45841:47fdfe] ROUTING-PROBE request command=startAnimation preview=(null)
+2026-09-22 22:51:27.896 Df Routing Probe Appex[45841:47fe05] ROUTING-PROBE request command=handshake preview=0
+2026-09-22 22:51:27.898 Df Routing Probe Appex[45841:47fd73] [local.oozel.routing-probe:routing] PROBE init kind=APPEX preview=0 pid=45841 frame={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:27.900 Df Routing Probe Appex[45841:47fd73] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=0 pid=45841 size={1920, 1080}
+2026-09-22 22:51:27.900 Df Routing Probe Appex[45841:47fd73] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=0 pid=45841 frame={{0, 0}, {1920, 1080}} window={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:27.908 Df Routing Probe Appex[45841:47fd73] [local.oozel.routing-probe:routing] PROBE draw kind=APPEX preview=0 pid=45841 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:27.930 Df Routing Probe Appex[45833:47fe10] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 22:51:27.932 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE init kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:27.933 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={1920, 1080}
+2026-09-22 22:51:27.933 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}} window={{1185, 307}, {1920, 1080}}
+2026-09-22 22:51:27.944 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE draw kind=APPEX preview=1 pid=45833 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:27.957 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={0, 0}
+2026-09-22 22:51:27.957 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={0, 0}
+2026-09-22 22:51:27.957 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 22:51:28.930 Df Routing Probe Zero[45863:47fe92] ROUTING-PROBE request command=startAnimation preview=(null)
+2026-09-22 22:51:28.933 Df Routing Probe Zero[45862:47fe8b] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 22:51:28.933 Df Routing Probe Zero[45863:47fe8e] ROUTING-PROBE request command=handshake preview=0
+2026-09-22 22:51:28.938 Df Routing Probe Zero[45863:47fe88] [local.oozel.routing-probe:routing] PROBE init kind=ZERO preview=0 pid=45863 frame={{0, 0}, {0, 0}}
+2026-09-22 22:51:28.938 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE init kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}}
+2026-09-22 22:51:28.960 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=1 pid=45862 size={0, 0}
+2026-09-22 22:51:28.960 Df Routing Probe Zero[45863:47fe88] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=0 pid=45863 size={0, 0}
+2026-09-22 22:51:28.960 Df Routing Probe Zero[45863:47fe88] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=0 pid=45863 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 22:51:28.960 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}} window={{1185, 307}, {0, 0}}
+2026-09-22 22:51:28.964 Df Routing Probe Zero[45862:47fe93] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 22:51:28.966 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE init kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}}
+2026-09-22 22:51:28.967 Df Routing Probe Zero[45863:47fe88] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=0 pid=45863 size={1920, 1080}
+2026-09-22 22:51:28.967 Df Routing Probe Zero[45863:47fe88] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=0 pid=45863 size={3840, 2160}
+2026-09-22 22:51:28.967 Df Routing Probe Zero[45863:47fe88] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=0 pid=45863 size={1920, 1080}
+2026-09-22 22:51:28.974 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=1 pid=45862 size={0, 0}
+2026-09-22 22:51:28.974 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}} window={{1185, 307}, {0, 0}}
+2026-09-22 22:51:28.975 Df Routing Probe Zero[45863:47fe88] [local.oozel.routing-probe:routing] PROBE draw kind=ZERO preview=0 pid=45863 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:28.975 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 22:51:28.978 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 22:51:31.336 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {133, 16}} window={{0, 0}, {0, 0}}
+2026-09-22 22:51:42.995 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE init kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}}
+2026-09-22 22:51:42.995 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=1 pid=45835 size={0, 0}
+2026-09-22 22:51:42.995 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}} window={{1185, 307}, {0, 0}}
+2026-09-22 22:51:43.001 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=1 pid=45835 size={133, 16}
+2026-09-22 22:51:43.001 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE draw kind=LEGACY preview=1 pid=45835 bounds={{0, 0}, {133, 16}}
+2026-09-22 22:51:43.078 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE init kind=LEGACY preview=0 pid=45836 frame={{0, 0}, {1920, 1080}}
+2026-09-22 22:51:43.078 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=0 pid=45836 size={1920, 1080}
+2026-09-22 22:51:43.078 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=0 pid=45836 frame={{0, 0}, {1920, 1080}} window={{0, 0}, {0, 0}}
+2026-09-22 22:51:43.083 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=0 pid=45836 size={3840, 2160}
+2026-09-22 22:51:43.084 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE draw kind=LEGACY preview=0 pid=45836 bounds={{0, 0}, {3840, 2160}}
+2026-09-22 22:51:43.091 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {133, 16}} window={{0, 0}, {0, 0}}
+2026-09-22 22:51:43.093 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE init kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}}
+2026-09-22 22:51:43.093 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=1 pid=45835 size={0, 0}
+2026-09-22 22:51:43.093 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}} window={{1215, 613}, {133, 16}}
+2026-09-22 22:53:10.468 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE init kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}}
+2026-09-22 22:53:10.469 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=1 pid=45835 size={0, 0}
+2026-09-22 22:53:10.469 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}} window={{30, 306}, {133, 16}}
+2026-09-22 22:53:10.579 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 23:23:33.382 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 23:23:33.386 Df Routing Probe Appex[45833:48acf9] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 23:23:33.393 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE init kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}}
+2026-09-22 23:23:33.400 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={1920, 1080}
+2026-09-22 23:23:33.400 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}} window={{1185, 307}, {1920, 1080}}
+2026-09-22 23:23:33.402 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE draw kind=APPEX preview=1 pid=45833 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 23:23:33.408 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={0, 0}
+2026-09-22 23:23:33.408 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={0, 0}
+2026-09-22 23:23:33.408 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 23:23:33.560 Df Routing Probe Appex[45833:48acf9] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 23:23:33.564 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE init kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}}
+2026-09-22 23:23:33.572 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={1920, 1080}
+2026-09-22 23:23:33.573 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}} window={{1185, 307}, {1920, 1080}}
+2026-09-22 23:23:33.574 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE draw kind=APPEX preview=1 pid=45833 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 23:23:33.574 Df Routing Probe Appex[45833:48c90e] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 23:23:33.578 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE init kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}}
+2026-09-22 23:23:33.589 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={1920, 1080}
+2026-09-22 23:23:33.589 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}} window={{1185, 307}, {1920, 1080}}
+2026-09-22 23:23:33.590 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {1920, 1080}} window={{0, 0}, {0, 0}}
+2026-09-22 23:23:33.591 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE draw kind=APPEX preview=1 pid=45833 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 23:23:33.596 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={0, 0}
+2026-09-22 23:23:33.596 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=1 pid=45833 size={0, 0}
+2026-09-22 23:23:33.597 Df Routing Probe Appex[45833:47fd2f] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=1 pid=45833 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 23:23:33.645 Df Routing Probe Appex[56262:48c92e] ROUTING-PROBE request command=startAnimation preview=(null)
+2026-09-22 23:23:33.647 Df Routing Probe Appex[56262:48c92e] ROUTING-PROBE request command=handshake preview=0
+2026-09-22 23:23:33.658 Df Routing Probe Appex[56262:48c918] [local.oozel.routing-probe:routing] PROBE init kind=APPEX preview=0 pid=56262 frame={{0, 0}, {1920, 1080}}
+2026-09-22 23:23:33.714 Df Routing Probe Appex[56262:48c918] [local.oozel.routing-probe:routing] PROBE resize kind=APPEX preview=0 pid=56262 size={1920, 1080}
+2026-09-22 23:23:33.714 Df Routing Probe Appex[56262:48c918] [local.oozel.routing-probe:routing] PROBE window kind=APPEX preview=0 pid=56262 frame={{0, 0}, {1920, 1080}} window={{0, 0}, {1920, 1080}}
+2026-09-22 23:23:33.726 Df Routing Probe Appex[56262:48c918] [local.oozel.routing-probe:routing] PROBE draw kind=APPEX preview=0 pid=56262 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 23:23:47.093 Df Routing Probe Zero[45862:48cae7] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 23:23:47.097 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE init kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}}
+2026-09-22 23:23:47.105 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=1 pid=45862 size={0, 0}
+2026-09-22 23:23:47.105 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}} window={{1185, 307}, {0, 0}}
+2026-09-22 23:23:47.108 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 23:23:47.253 Df Routing Probe Zero[45862:48c982] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 23:23:47.256 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE init kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}}
+2026-09-22 23:23:47.261 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=1 pid=45862 size={0, 0}
+2026-09-22 23:23:47.261 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}} window={{1185, 307}, {0, 0}}
+2026-09-22 23:23:47.262 Df Routing Probe Zero[45862:48cae7] ROUTING-PROBE request command=handshake preview=1
+2026-09-22 23:23:47.264 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE init kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}}
+2026-09-22 23:23:47.265 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=1 pid=45862 size={0, 0}
+2026-09-22 23:23:47.265 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}} window={{1185, 307}, {0, 0}}
+2026-09-22 23:23:47.266 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 23:23:47.268 Df Routing Probe Zero[45862:47fe84] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=1 pid=45862 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 23:23:47.283 Df Routing Probe Zero[56330:48cb28] ROUTING-PROBE request command=startAnimation preview=(null)
+2026-09-22 23:23:47.285 Df Routing Probe Zero[56330:48cb28] ROUTING-PROBE request command=handshake preview=0
+2026-09-22 23:23:47.290 Df Routing Probe Zero[56330:48caee] [local.oozel.routing-probe:routing] PROBE init kind=ZERO preview=0 pid=56330 frame={{0, 0}, {0, 0}}
+2026-09-22 23:23:47.315 Df Routing Probe Zero[56330:48caee] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=0 pid=56330 size={0, 0}
+2026-09-22 23:23:47.315 Df Routing Probe Zero[56330:48caee] [local.oozel.routing-probe:routing] PROBE window kind=ZERO preview=0 pid=56330 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 23:23:47.335 Df Routing Probe Zero[56330:48caee] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=0 pid=56330 size={1920, 1080}
+2026-09-22 23:23:47.335 Df Routing Probe Zero[56330:48caee] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=0 pid=56330 size={3840, 2160}
+2026-09-22 23:23:47.335 Df Routing Probe Zero[56330:48caee] [local.oozel.routing-probe:routing] PROBE resize kind=ZERO preview=0 pid=56330 size={1920, 1080}
+2026-09-22 23:23:47.344 Df Routing Probe Zero[56330:48caee] [local.oozel.routing-probe:routing] PROBE draw kind=ZERO preview=0 pid=56330 bounds={{0, 0}, {1920, 1080}}
+2026-09-22 23:23:57.740 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE init kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}}
+2026-09-22 23:23:57.740 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=1 pid=45835 size={0, 0}
+2026-09-22 23:23:57.740 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}} window={{1215, 613}, {133, 16}}
+2026-09-22 23:23:57.796 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE init kind=LEGACY preview=0 pid=45836 frame={{0, 0}, {1920, 1080}}
+2026-09-22 23:23:57.796 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=0 pid=45836 size={1920, 1080}
+2026-09-22 23:23:57.796 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=0 pid=45836 frame={{0, 0}, {1920, 1080}} window={{0, 0}, {0, 0}}
+2026-09-22 23:23:57.807 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=0 pid=45836 size={3840, 2160}
+2026-09-22 23:23:57.808 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE draw kind=LEGACY preview=0 pid=45836 bounds={{0, 0}, {3840, 2160}}
+2026-09-22 23:23:57.901 Df legacyScreenSaver[45836:47fd62] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=0 pid=45836 frame={{0, 0}, {3840, 2160}} window={{0, 0}, {0, 0}}
+2026-09-22 23:23:58.072 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE init kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}}
+2026-09-22 23:23:58.072 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=1 pid=45835 size={0, 0}
+2026-09-22 23:23:58.072 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}} window={{1185, 307}, {0, 0}}
+2026-09-22 23:23:58.072 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE resize kind=LEGACY preview=1 pid=45835 size={133, 16}
+2026-09-22 23:23:58.074 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE draw kind=LEGACY preview=1 pid=45835 bounds={{0, 0}, {133, 16}}
+2026-09-22 23:23:58.077 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE init kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}}
+2026-09-22 23:23:58.188 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {0, 0}} window={{0, 0}, {0, 0}}
+2026-09-22 23:26:21.778 Df legacyScreenSaver[45835:47fd60] [local.oozel.routing-probe:routing] PROBE window kind=LEGACY preview=1 pid=45835 frame={{0, 0}, {133, 16}} window={{0, 0}, {0, 0}}
