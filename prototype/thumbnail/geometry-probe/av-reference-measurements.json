@@ -1,0 +1,71 @@
+{
+  "image": "av-decoded-reference.png",
+  "screenshot_size": [
+    1920,
+    1080
+  ],
+  "corner_markers": [
+    {
+      "center": [
+        130.0,
+        130.0
+      ],
+      "bounds": [
+        80,
+        80,
+        180,
+        180
+      ]
+    },
+    {
+      "center": [
+        1790.0,
+        130.0
+      ],
+      "bounds": [
+        1740,
+        80,
+        1840,
+        180
+      ]
+    },
+    {
+      "center": [
+        130.0,
+        950.0
+      ],
+      "bounds": [
+        80,
+        900,
+        180,
+        1000
+      ]
+    },
+    {
+      "center": [
+        1790.0,
+        950.0
+      ],
+      "bounds": [
+        1740,
+        900,
+        1840,
+        1000
+      ]
+    }
+  ],
+  "source_size": [
+    1920,
+    1080
+  ],
+  "scale_x": 1.0,
+  "scale_y": 1.0,
+  "horizontal_to_vertical_scale": 1.0,
+  "inferred_content_rect": [
+    0.0,
+    0.0,
+    1920.0,
+    1080.0
+  ],
+  "uniform_within_2_percent": true
+}

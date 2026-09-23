@@ -1,5 +1,7 @@
 # Draft — not submitted to Apple
 
+**Investigation update:** the [working-saver comparison](working-saver-comparison.md) found that current Aerial uses a different native wallpaper extension path, still untested with our calibration. Electric Sheep and Magic Window Air visibly fill the Settings slot cleanly. An Aerial 4.0-style AVPlayerLayer control on our existing integration still reproduced the 0.897 ratio. This draft describes the tested integration; it does not establish a platform-wide limitation.
+
 ## Title
 
 macOS 26.5.1 Screen Saver Settings distorts a 16:9 live source to approximately 16:10; separately created preview instance does not supply the large image

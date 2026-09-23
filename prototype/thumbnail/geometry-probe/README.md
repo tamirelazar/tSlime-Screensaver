@@ -34,7 +34,7 @@ Read-only inspection of Apple's `Wallpaper.appex` found a `LiveWallpaperView` th
 
 The host also uses `WallpaperDisplayAttributes.isPreview`, which is a **different API flag** from `ScreenSaverView.isPreview`. Its presence does not give the saver a new handshake field. Reproducible commands, UUIDs, addresses, excerpts and limits are in [presentation-trace.md](presentation-trace.md). The main agent independently checked the decisive preload and layer-sizing excerpts.
 
-No saver-owned control for the selected image's layer or composition was found in this bounded audit. The result does not prove every alternate mechanism impossible. It does mean there is no concrete isolated candidate to test now. Applying inverse stretching or the 64×20 grid to every false instance would also affect the saver composition, which is outside this preview-only change.
+No saver-owned control for the selected image's layer or composition was found in this bounded audit of the existing saver integration. The result does not prove every alternate mechanism impossible. A later [Aerial and installed-saver comparison](working-saver-comparison.md) identifies a concrete alternative: current Aerial's native `com.apple.wallpaper` extension owns a destination-sized remote context. That path remains untested for our content. Applying inverse stretching or the 64×20 grid to every false instance in the existing integration would also affect the saver composition, which is outside this preview-only change.
 
 ## Reproduce and verify
 
@@ -76,4 +76,4 @@ AppexSaverMinimal was restored and its rendered animation observed ([capture](pr
 
 ## Next decision
 
-The evidence is ready for Apple: [feedback-draft.md](feedback-draft.md), **not submitted**. It asks about aspect preservation and a supported preview-specific route, distinguishing the public legacy reproduction from the private extension geometry test. Keep the Wayfinder ticket open. The owner chose C's coarse appearance, but the platform path needed to implement it independently remains unverified.
+The [working-saver comparison](working-saver-comparison.md) is the latest investigation: Electric Sheep and Magic Window Air fill the native slot cleanly; our Aerial 4.0-style AVPlayerLayer calibration still measures 0.897; Aerial 4.1's distinct native wallpaper interface is the next concrete test candidate. The [Apple feedback draft](feedback-draft.md) remains **not submitted** and should not be read as proof that all integrations distort the image. Keep the Wayfinder ticket open. The owner chose C's coarse appearance, but the platform path needed to implement it independently remains unverified.

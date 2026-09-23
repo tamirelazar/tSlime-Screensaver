@@ -1,0 +1,15 @@
+Timestamp               Ty Process[PID:TID]
+2026-09-23 09:33:26.771 Df AV Geometry Probe[45205:582202] AV-GEOMETRY layout pid=45205 preview=1 bounds={{0, 0}, {1920, 1080}} videoFrame={{0, 0}, {1920, 1080}}
+2026-09-23 09:33:26.781 Df AV Geometry Probe[45205:582202] AV-GEOMETRY pid=45205 preview=1 bounds={{0, 0}, {1920, 1080}} backing=2 gravity=AVLayerVideoGravityResizeAspect
+2026-09-23 09:33:26.818 Df AV Geometry Probe[45205:582202] AV-GEOMETRY layout pid=45205 preview=1 bounds={{0, 0}, {0, 0}} videoFrame={{0, 0}, {0, 0}}
+2026-09-23 09:33:45.691 Df AV Geometry Probe[45205:582202] AV-GEOMETRY layout pid=45205 preview=1 bounds={{0, 0}, {1920, 1080}} videoFrame={{0, 0}, {1920, 1080}}
+2026-09-23 09:33:45.693 Df AV Geometry Probe[45205:582202] AV-GEOMETRY pid=45205 preview=1 bounds={{0, 0}, {1920, 1080}} backing=2 gravity=AVLayerVideoGravityResizeAspect
+2026-09-23 09:33:45.696 Df AV Geometry Probe[45205:582202] AV-GEOMETRY layout pid=45205 preview=1 bounds={{0, 0}, {0, 0}} videoFrame={{0, 0}, {0, 0}}
+2026-09-23 09:33:45.697 Df AV Geometry Probe[45205:582202] AV-GEOMETRY pid=45205 preview=1 bounds={{0, 0}, {0, 0}} backing=0 gravity=AVLayerVideoGravityResizeAspect
+2026-09-23 09:34:15.928 Df AV Geometry Probe[45205:582202] AV-GEOMETRY pid=45205 preview=1 bounds={{0, 0}, {0, 0}} backing=0 gravity=AVLayerVideoGravityResizeAspect
+2026-09-23 09:36:16.272 Df AV Geometry Probe[45205:582202] AV-GEOMETRY layout pid=45205 preview=1 bounds={{0, 0}, {1920, 1080}} videoFrame={{0, 0}, {1920, 1080}}
+2026-09-23 09:36:16.287 Df AV Geometry Probe[45205:582202] AV-GEOMETRY pid=45205 preview=1 bounds={{0, 0}, {1920, 1080}} backing=2 gravity=AVLayerVideoGravityResizeAspect
+2026-09-23 09:36:16.309 Df AV Geometry Probe[45205:582202] AV-GEOMETRY layout pid=45205 preview=1 bounds={{0, 0}, {0, 0}} videoFrame={{0, 0}, {0, 0}}
+2026-09-23 09:36:16.310 Df AV Geometry Probe[45205:582202] AV-GEOMETRY pid=45205 preview=1 bounds={{0, 0}, {0, 0}} backing=0 gravity=AVLayerVideoGravityResizeAspect
+2026-09-23 09:36:16.589 Df AV Geometry Probe[46317:584130] AV-GEOMETRY layout pid=46317 preview=0 bounds={{0, 0}, {1920, 1080}} videoFrame={{0, 0}, {1920, 1080}}
+2026-09-23 09:36:16.630 Df AV Geometry Probe[46317:584130] AV-GEOMETRY pid=46317 preview=0 bounds={{0, 0}, {1920, 1080}} backing=2 gravity=AVLayerVideoGravityResizeAspect
