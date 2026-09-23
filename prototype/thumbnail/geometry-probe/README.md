@@ -53,6 +53,10 @@ No saver-owned control for the selected image's layer or composition was found i
 
 Cleanup completed: AppexSaverMinimal restored and its animation observed; geometry extension registration removed; no Geometry Probe processes remained. No full-screen saver session ran. Normal product source/build were not changed.
 
+## Online follow-up
+
+The [community research](community-code-research.md) found a shipped adjacent scaling fix (remove the saver root’s explicit autoresizing mask), an experimental lock-state preview heuristic, and an iScreensaver vendor claim of fixed preview mode. The root-mask control should be tested before treating our distortion as entirely host-caused; the product does not explicitly set that mask, while this probe does. None is yet a verified fix for this product’s selected image.
+
 ## Next decision
 
 The evidence is ready for Apple: [feedback-draft.md](feedback-draft.md), **not submitted**. It asks about aspect preservation and a supported preview-specific route, distinguishing the public legacy reproduction from the private extension geometry test. Keep the Wayfinder ticket open. The owner chose C's coarse appearance, but the platform path needed to implement it independently remains unverified.
