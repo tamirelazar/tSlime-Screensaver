@@ -11,6 +11,8 @@ The large selected-saver image **compresses a 16:9 source horizontally by about 
 | Matching offscreen reference | 1920×1080 | 1920×1080 | 1.000 |
 | First Settings selection | 1920×1080 | 159.61×99.77 | 0.900 |
 | Reselection after original saver | 1920×1080 | 159.61×100.10 | 0.897 |
+| No explicit root autoresizing mask | 1920×1080 | 159.61×100.10 | 0.897 |
+| No-mask reselection | 1920×1080 | 159.61×100.10 | 0.897 |
 
 Measurements use the centers of four 100×100 cyan markers at known source coordinates. A 400×400 magenta square provides a visual cross-check. All four corners, colored edges and the 5% inset remain visible: there is no substantial crop in this extension test. Screenshot resampling and subpixel boundaries limit precision; treat the result as approximately 10%, not three-decimal accuracy. The 160×100 values are **capture pixels**, not an independently measured AppKit view frame. The aspect ratio and relative axis scaling are the decisive quantities.
 
@@ -55,7 +57,22 @@ Cleanup completed: AppexSaverMinimal restored and its animation observed; geomet
 
 ## Online follow-up
 
-The [community research](community-code-research.md) found a shipped adjacent scaling fix (remove the saver root’s explicit autoresizing mask), an experimental lock-state preview heuristic, and an iScreensaver vendor claim of fixed preview mode. The root-mask control should be tested before treating our distortion as entirely host-caused; the product does not explicitly set that mask, while this probe does. None is yet a verified fix for this product’s selected image.
+The [community research](community-code-research.md) found a shipped adjacent scaling fix (remove the saver root’s explicit autoresizing mask), an experimental lock-state preview heuristic, and an iScreensaver vendor claim of fixed preview mode. None is a verified fix for this product’s selected image.
+
+### Root autoresizing control — no improvement
+
+On 2026-09-23 we tested the exact one-line [WebViewScreenSaver change](https://github.com/liquidx/webviewscreensaver/commit/f5bc558ad35de7162ea319a8de80982b2db23828): remove the root view's explicit `NSViewWidthSizable | NSViewHeightSizable` assignment. This is the only functional source change from the baseline. `Calibration.m`, the controller, measurement procedure and `reference.png` are unchanged. The current `GeometryView.m` retains the removal; the baseline source is at commit `7c2b28a`.
+
+Both new selections measured **0.897 horizontal / vertical scale**, matching the baseline reselection. The full-size processes were freshly launched PIDs 39112 and 39289, each reporting `preview=0`, `bounds=1920×1080`, `backing=2`; the separate true instance was PID 39111. See [no-autoresize-observations.txt](no-autoresize-observations.txt), [first capture](settings-no-autoresize.png), [repeat capture](settings-no-autoresize-repeat.png), and their `no-autoresize-*-measurements.json` results.
+
+```sh
+python3 measure.py settings-no-autoresize.png --settings --verify-uniform
+python3 measure.py settings-no-autoresize-repeat.png --settings --verify-uniform
+```
+
+Both commands exit 1: the uniform-scaling assertion still fails. Removing this assignment does not fix the measured distortion on this Mac. It eliminates this explicit setting as a necessary condition for our reproduction; it does not identify the precise host operation responsible. The product already omits the explicit root mask, so no product patch follows from this test.
+
+AppexSaverMinimal was restored and its rendered animation observed ([capture](product-after-no-autoresize.png)). Settings was quit, the temporary probe and host were unregistered, and no probe processes remained. No full-screen session ran.
 
 ## Next decision
 

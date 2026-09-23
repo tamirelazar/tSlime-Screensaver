@@ -5,7 +5,6 @@
 @implementation RoutingProbeView
 - (instancetype)initWithFrame:(NSRect)frame isPreview:(BOOL)preview {
     self=[super initWithFrame:frame isPreview:preview];
-    if(self) self.autoresizingMask=NSViewWidthSizable|NSViewHeightSizable;
     return self;
 }
 - (BOOL)isOpaque { return YES; }

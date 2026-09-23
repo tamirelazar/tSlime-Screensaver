@@ -25,6 +25,8 @@ Expected: the source's proportions are preserved; its square remains square, whe
 
 Actual: the complete 1920×1080 card appears in approximately 160×100 screenshot pixels. Its horizontal scale is 0.900 / 0.897 of its vertical scale across two selections. All four corner markers and edges remain visible. The source view reports 1920×1080 bounds and backing scale 2. Screenshot sampling limits precision, but the roughly 10% anisotropic distortion is clear.
 
+Control: removing the root view's explicit width/height autoresizing mask, as in WebViewScreenSaver's published Tahoe scaling fix, leaves the result unchanged. Two additional selections from fresh full-size processes both measure 0.897, with the same 1920×1080 bounds. The current attached source omits that assignment. The drawing code and offscreen reference are unchanged. This rules out that explicit assignment as a necessary condition, without proving which host operation introduces the distortion.
+
 No full-screen saver session was started. This report does not assert the same distortion in the real full-screen session or on other macOS releases.
 
 ## Separate public-API routing reproduction
@@ -46,8 +48,8 @@ Related developer discussion, not proof of an identical underlying cause: https:
 ## Suggested attachments
 
 - `Calibration.h`, `Calibration.m`, `GeometryView.m`, `Render.m`, `build.py`, and sibling routing-probe sources needed to build.
-- `reference.png`, `settings-capture.png`, `settings-repeat.png`.
-- `measure.py` and the three measurement JSON files.
-- Filtered `observations.txt` from both probes, plus each README.
+- `reference.png`, `settings-capture.png`, `settings-repeat.png`, `settings-no-autoresize.png`, `settings-no-autoresize-repeat.png`.
+- `measure.py` and the five measurement JSON files.
+- Filtered `observations.txt` and `no-autoresize-observations.txt`, plus each probe's README.
 
 The local private-framework disassembly helped our investigation but is not needed for this behavioral reproduction. No credentials, user preferences dump, or full system log is included. Submit this draft only after the owner chooses to do so.

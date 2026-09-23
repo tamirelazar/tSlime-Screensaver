@@ -1,0 +1,71 @@
+{
+  "image": "settings-no-autoresize.png",
+  "screenshot_size": [
+    500,
+    548
+  ],
+  "corner_markers": [
+    {
+      "center": [
+        181.0,
+        32.0
+      ],
+      "bounds": [
+        177,
+        27,
+        185,
+        37
+      ]
+    },
+    {
+      "center": [
+        319.0,
+        32.0
+      ],
+      "bounds": [
+        315,
+        27,
+        323,
+        37
+      ]
+    },
+    {
+      "center": [
+        181.0,
+        108.0
+      ],
+      "bounds": [
+        177,
+        103,
+        185,
+        113
+      ]
+    },
+    {
+      "center": [
+        319.0,
+        108.0
+      ],
+      "bounds": [
+        315,
+        103,
+        323,
+        113
+      ]
+    }
+  ],
+  "source_size": [
+    1920,
+    1080
+  ],
+  "scale_x": 0.08313253012048193,
+  "scale_y": 0.09268292682926829,
+  "horizontal_to_vertical_scale": 0.8969562460367787,
+  "inferred_content_rect": [
+    170.19277108433735,
+    19.951219512195124,
+    159.6144578313253,
+    100.09756097560975
+  ],
+  "uniform_within_2_percent": false
+}

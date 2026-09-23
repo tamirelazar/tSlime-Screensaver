@@ -12,6 +12,8 @@ Users reported web content positioned off the top-right of the screen on macOS 2
 
 **Local applicability:** our product's `AppexSaverMinimalView` and controller do not explicitly set that outer mask; the disposable `GeometryView.m` does. This gives us a useful one-variable calibration control before assigning the distortion entirely to the host. It is not yet a verified fix for our product or the measured aspect ratio. A child terminal view's autoresizing policy is a different setting.
 
+**Subsequent native control, 2026-09-23:** removing that single assignment did **not** improve our result. Two selections both measured horizontal/vertical scale 0.897, matching the baseline reselection; fresh processes still logged full 1920×1080 bounds. The probe now omits the assignment. See the [test record and captures](README.md#root-autoresizing-control--no-improvement). This rules out the published one-line change as a fix for this reproduction, without contradicting its success for WebViewScreenSaver's different symptom.
+
 ## 2. ScreenSaverMinimal: infer preview from lock state
 
 The author published an experimental change on **2025-07-28**, then made it optional on **2025-07-29**. It reads the session's `CGSSessionScreenIsLocked` value: locked means full-screen; unlocked means preview, regardless of the incoming `isPreview`. It passes that reclassified value into the saver initializer. The follow-up checks whether System Settings is running and exits an inferred preview after Settings closes. Sources: [initial implementation](https://github.com/AerialScreensaver/ScreenSaverMinimal/commit/f94b6e787ce6554bf4dee3372eac1d5f2cd8ed16), [optional workaround and cleanup](https://github.com/AerialScreensaver/ScreenSaverMinimal/commit/6f6a39932af1d13e34c6d81f9a7d90262cc3d9e1).
@@ -40,6 +42,6 @@ Aerial's current project migrated from legacy `.saver` hosting to an app extensi
 
 ## Recommended next investigation
 
-First rerun the calibration with its explicit root autoresizing mask removed, keeping everything else fixed. It is a published fix for a nearby Tahoe sizing bug and eliminates a difference between the probe and the product. Then assess preview identification separately: the lock-state heuristic is concrete but must be tested against an actual unlocked saver, Settings, and transitions before considering it for C. The iScreensaver author may know another approach, but their release note alone does not establish one.
+The root-mask control is now complete and did not fix our geometry. Assess preview identification separately: the lock-state heuristic is concrete but must be tested against an actual unlocked saver, Settings, and transitions before considering it for C. The iScreensaver author may know another approach, but their release note alone does not establish one.
 
 We have not submitted the Apple report, contacted maintainers, or installed any third-party software. The existing measurements remain valid observations of the tested probe; attribution to a particular host operation remains provisional.

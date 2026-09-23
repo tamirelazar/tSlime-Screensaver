@@ -1,0 +1,8 @@
+Timestamp               Ty Process[PID:TID]
+2026-09-23 09:18:29.420 Df Geometry Probe[39111:57907e] GEOMETRY-PROBE pid=39111 preview=1 bounds={{0, 0}, {1920, 1080}} backing=2
+2026-09-23 09:18:29.426 Df Geometry Probe[39112:579088] GEOMETRY-PROBE pid=39112 preview=0 bounds={{0, 0}, {1920, 1080}} backing=2
+2026-09-23 09:18:29.446 Df Geometry Probe[39112:579088] GEOMETRY-PROBE pid=39112 preview=0 bounds={{0, 0}, {1920, 1080}} backing=2
+2026-09-23 09:19:01.663 Df Geometry Probe[39289:5795fd] GEOMETRY-PROBE pid=39289 preview=0 bounds={{0, 0}, {1920, 1080}} backing=2
+2026-09-23 09:19:05.397 Df Geometry Probe[39111:57907e] GEOMETRY-PROBE pid=39111 preview=1 bounds={{0, 0}, {1920, 1080}} backing=2
+2026-09-23 09:19:05.466 Df Geometry Probe[39289:5795fd] GEOMETRY-PROBE pid=39289 preview=0 bounds={{0, 0}, {1920, 1080}} backing=2
+2026-09-23 09:19:05.500 Df Geometry Probe[39289:5795fd] GEOMETRY-PROBE pid=39289 preview=0 bounds={{0, 0}, {1920, 1080}} backing=2
